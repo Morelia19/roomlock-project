@@ -56,36 +56,15 @@ export const addReview = async (data: AddReviewData) => {
         throw new Error('Anuncio no encontrado');
     }
 
-    // For simplicity, create a reservation if one doesn't exist
-    // In a real app, you'd check if user actually reserved this property
-    let reservation = await prisma.reservation.findFirst({
-        where: {
+    // For simplicity, create a new reservation for each review
+    // This allows multiple reviews from the same user
+    const reservation = await prisma.reservation.create({
+        data: {
             announcement_id: announcementId,
-            student_id: userId
-        },
-        include: {
-            review: true
+            student_id: userId,
+            state: 'completado'
         }
     });
-
-    // If user never made a reservation, create one with "completed" state
-    if (!reservation) {
-        reservation = await prisma.reservation.create({
-            data: {
-                announcement_id: announcementId,
-                student_id: userId,
-                state: 'completado'
-            },
-            include: {
-                review: true
-            }
-        });
-    }
-
-    // Check if user already reviewed
-    if (reservation.review) {
-        throw new Error('Ya has dejado una valoración para este anuncio');
-    }
 
     // Create the review
     const review = await prisma.review.create({

@@ -41,7 +41,7 @@ export function Header() {
       );
     } else if (user?.role === "owner") {
       items.push(
-        { label: "Mis Anuncios", path: "/my-listings", icon: Key },
+        { label: "Mis Anuncios", path: "/my-announcements", icon: Key },
         { label: "Mensajes", path: "/messages", icon: MessageCircle }
       );
     } else if (user?.role === "admin") {

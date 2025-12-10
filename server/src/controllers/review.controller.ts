@@ -58,7 +58,10 @@ export const addReview = async (req: Request, res: Response) => {
             });
         }
 
-        if (!rating || rating < 1 || rating > 5) {
+        // Parse rating from string to number (comes from FormData as string)
+        const ratingNumber = Number.parseInt(rating, 10);
+
+        if (!ratingNumber || Number.isNaN(ratingNumber) || ratingNumber < 1 || ratingNumber > 5) {
             return res.status(400).json({
                 error: 'Calificación debe estar entre 1 y 5'
             });
@@ -73,7 +76,7 @@ export const addReview = async (req: Request, res: Response) => {
         const review = await addReviewService({
             userId,
             announcementId,
-            rating,
+            rating: ratingNumber,
             comment
         });
 

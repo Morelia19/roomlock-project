@@ -20,6 +20,7 @@ export const ReviewModal: FC<ReviewModalProps> = ({
     const [comment, setComment] = useState('');
     const [image, setImage] = useState<File | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isDragging, setIsDragging] = useState(false);
 
     if (!isOpen) return null;
 
@@ -55,92 +56,168 @@ export const ReviewModal: FC<ReviewModalProps> = ({
         }
     };
 
+    const handleDragOver = (e: React.DragEvent) => {
+        e.preventDefault();
+        setIsDragging(true);
+    };
+
+    const handleDragLeave = () => {
+        setIsDragging(false);
+    };
+
+    const handleDrop = (e: React.DragEvent) => {
+        e.preventDefault();
+        setIsDragging(false);
+
+        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+            const file = e.dataTransfer.files[0];
+            if (file.type.startsWith('image/')) {
+                setImage(file);
+            }
+        }
+    };
+
     return (
         <>
             {/* Backdrop */}
             <div
-                className="fixed inset-0 bg-black bg-opacity-50 z-50 transition-opacity"
+                style={{
+                    position: 'fixed',
+                    inset: 0,
+                    backgroundColor: 'rgba(0, 0, 0, 0.75)',
+                    zIndex: 9998,
+                    transition: 'opacity 0.2s',
+                }}
                 onClick={onClose}
             />
 
             {/* Modal */}
-            <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg bg-white rounded-2xl z-50 shadow-2xl p-6">
+            <div
+                style={{
+                    position: 'fixed',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    width: '100%',
+                    maxWidth: '42rem',
+                    backgroundColor: 'white',
+                    borderRadius: '1.5rem',
+                    zIndex: 9999,
+                    boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+                    padding: '2rem',
+                    margin: '0 1rem',
+                    maxHeight: '90vh',
+                    overflowY: 'auto',
+                }}
+            >
                 {/* Header */}
-                <div className="flex items-start justify-between mb-6">
-                    <div>
-                        <h2 className="text-xl font-semibold" style={{ color: "var(--roomlock-text-primary)" }}>
+                < div className="flex items-start justify-between mb-6" >
+                    <div className="flex-1">
+                        <h2 className="text-2xl font-bold mb-2" style={{ color: "var(--roomlock-text-primary)" }}>
                             Deja tu valoración y comentario
                         </h2>
-                        <p className="text-sm text-gray-500 mt-1">
+                        <p className="text-base text-gray-500">
                             Comparte tu experiencia en {announcementTitle}
                         </p>
                     </div>
                     <button
                         onClick={onClose}
-                        className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+                        className="p-2 hover:bg-gray-100 rounded-full transition-colors ml-4"
                         disabled={isSubmitting}
                     >
-                        <X className="h-5 w-5" />
+                        <X className="h-6 w-6 text-gray-500" />
                     </button>
-                </div>
+                </div >
 
                 {/* Content */}
-                <div className="space-y-6">
+                < div className="space-y-6" >
                     {/* Rating */}
-                    <div>
-                        <label className="block text-sm font-medium mb-3" style={{ color: "var(--roomlock-text-primary)" }}>
+                    < div >
+                        <label className="block text-base font-semibold mb-4" style={{ color: "var(--roomlock-text-primary)" }}>
                             Calificación General <span className="text-red-500">*</span>
                         </label>
                         <div className="flex gap-2">
-                            {[1, 2, 3, 4, 5].map((star) => (
-                                <button
-                                    key={star}
-                                    type="button"
-                                    onClick={() => setRating(star)}
-                                    onMouseEnter={() => setHoverRating(star)}
-                                    onMouseLeave={() => setHoverRating(0)}
-                                    className="transition-transform hover:scale-110"
-                                >
-                                    <Star
-                                        className={`h-8 w-8 ${star <= (hoverRating || rating)
-                                            ? 'fill-yellow-400 stroke-yellow-400'
-                                            : 'fill-gray-200 stroke-gray-300'
-                                            }`}
-                                    />
-                                </button>
-                            ))}
+                            {[1, 2, 3, 4, 5].map((star) => {
+                                const isActive = star <= (hoverRating || rating);
+                                return (
+                                    <button
+                                        key={star}
+                                        type="button"
+                                        onClick={() => setRating(star)}
+                                        onMouseEnter={() => setHoverRating(star)}
+                                        onMouseLeave={() => setHoverRating(0)}
+                                        style={{
+                                            background: 'none',
+                                            border: 'none',
+                                            padding: 0,
+                                            cursor: 'pointer',
+                                            transition: 'transform 0.2s',
+                                        }}
+                                        onMouseDown={(e) => {
+                                            e.currentTarget.style.transform = 'scale(0.95)';
+                                        }}
+                                        onMouseUp={(e) => {
+                                            e.currentTarget.style.transform = 'scale(1.1)';
+                                        }}
+                                        disabled={isSubmitting}
+                                    >
+                                        <Star
+                                            style={{
+                                                width: '48px',
+                                                height: '48px',
+                                                fill: isActive ? '#FBBF24' : 'none',
+                                                stroke: isActive ? '#F59E0B' : '#9CA3AF',
+                                                strokeWidth: 2,
+                                                transition: 'all 0.2s',
+                                            }}
+                                        />
+                                    </button>
+                                );
+                            })}
                         </div>
-                    </div>
+                    </div >
 
                     {/* Comment */}
-                    <div>
-                        <label className="block text-sm font-medium mb-2" style={{ color: "var(--roomlock-text-primary)" }}>
+                    < div >
+                        <label className="block text-base font-semibold mb-3" style={{ color: "var(--roomlock-text-primary)" }}>
                             Tu comentario <span className="text-red-500">*</span>
                         </label>
                         <textarea
                             value={comment}
                             onChange={(e) => setComment(e.target.value.slice(0, 75))}
                             placeholder="Comparte tu experiencia en Departamento compartido Miraflores..."
-                            className="w-full h-24 px-4 py-3 border border-gray-200 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-[var(--roomlock-primary)] focus:border-transparent"
+                            className="w-full h-32 px-4 py-4 border border-gray-200 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-[var(--roomlock-primary)] focus:border-transparent text-base bg-gray-50"
+                            style={{ backgroundColor: '#F3F4F6' }}
                             maxLength={75}
                             disabled={isSubmitting}
                         />
-                        <div className="flex justify-end mt-1">
-                            <span className="text-sm text-gray-400">
+                        <div className="flex justify-end mt-2">
+                            <span className="text-sm font-medium text-gray-500">
                                 {comment.length}/75
                             </span>
                         </div>
-                    </div>
+                    </div >
 
-                    {/* Image Upload */}
-                    <div>
-                        <label className="block text-sm font-medium mb-2" style={{ color: "var(--roomlock-text-primary)" }}>
+                    < div className='mb-6'>
+                        <label className="block text-base font-semibold mb-3" style={{ color: "var(--roomlock-text-primary)" }}>
                             Añadir foto (opcional)
                         </label>
-                        <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-[var(--roomlock-primary)] rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
-                            <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                <Upload className="h-8 w-8 mb-2" style={{ color: "var(--roomlock-primary)" }} />
-                                <p className="text-sm" style={{ color: "var(--roomlock-primary)" }}>
+                        <label
+                            onDragOver={handleDragOver}
+                            onDragLeave={handleDragLeave}
+                            onDrop={handleDrop}
+                            className={`flex flex-col items-center justify-center w-full h-40 border-2 border-dashed rounded-xl cursor-pointer transition-all ${isDragging
+                                ? 'border-[var(--roomlock-primary)] bg-[var(--roomlock-primary)]/5'
+                                : 'border-[var(--roomlock-primary)] hover:bg-gray-50'
+                                }`}
+                            style={{ borderColor: 'var(--roomlock-primary)' }}
+                        >
+                            <div className="flex flex-col items-center justify-center py-6">
+                                <Upload
+                                    className="h-10 w-10 mb-3"
+                                    style={{ color: 'var(--roomlock-primary)' }}
+                                />
+                                <p className="text-base font-medium" style={{ color: 'var(--roomlock-primary)' }}>
                                     {image ? image.name : 'Arrastra una imagen o haz clic aquí'}
                                 </p>
                             </div>
@@ -152,21 +229,21 @@ export const ReviewModal: FC<ReviewModalProps> = ({
                                 disabled={isSubmitting}
                             />
                         </label>
-                    </div>
-                </div>
+                    </div >
+                </div >
 
                 {/* Footer */}
-                <div className="mt-6">
+                < div className="mt-8" >
                     <Button
                         onClick={handleSubmit}
                         disabled={isSubmitting || rating === 0 || !comment.trim()}
-                        className="w-full h-12 text-base"
+                        className="w-full h-14 text-lg font-semibold rounded-xl"
                         style={{ backgroundColor: "var(--roomlock-cta)", color: "white" }}
                     >
                         {isSubmitting ? 'Publicando...' : 'Publicar Valoración'}
                     </Button>
-                </div>
-            </div>
+                </div >
+            </div >
         </>
     );
 };

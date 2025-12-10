@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { authenticateToken } from '../middleware/auth.middleware.js';
+import { upload } from '../middleware/upload.middleware.js';
 import * as reviewController from '../controllers/review.controller.js';
 import * as announcementController from '../controllers/announcement.controller.js';
 
@@ -14,7 +15,7 @@ router.get('/my-announcements', authenticateToken, announcementController.getMyA
 // Get reviews for an announcement
 router.get('/:announcementId/reviews', reviewController.getAnnouncementReviews);
 
-// Add a review (requires authentication)
-router.post('/:announcementId/reviews', authenticateToken, reviewController.addReview);
+// Add a review (requires authentication and handles file upload)
+router.post('/:announcementId/reviews', authenticateToken, upload.single('image'), reviewController.addReview);
 
 export default router;

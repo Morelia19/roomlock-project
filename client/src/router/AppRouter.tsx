@@ -8,6 +8,7 @@ import { FavoritesPage } from '@/pages/favorites/FavoritesPage';
 import { SearchPage } from '@/pages/search/SearchPage';
 import { AnnouncementDetail } from '@/pages/announcementDetail';
 import { MyAnnouncementsPage } from '@/pages/myAnnouncements/MyAnnouncementsPage';
+import { AdminPanelPage } from '@/pages/adminPanel/AdminPanelPage';
 import { AuthProvider } from '@/contexts/AuthContext';
 
 
@@ -27,6 +28,7 @@ export const AppRouter = () => {
             <Route path="/messages" element={<MessagesPage />} />
             <Route path="/favorites" element={<FavoritesPage />} />
             <Route path="/my-announcements" element={<MyAnnouncementsPage />} />
+            <Route path="/admin" element={<AdminPanelPage />} />
 
             {/* Ruta por defecto temporal */}
             <Route path="/" element={<HomePage />} />

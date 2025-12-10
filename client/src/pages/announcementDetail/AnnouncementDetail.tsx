@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { MapPin, Bed, Bath, Star, Share2, Bookmark, Phone } from 'lucide-react';
+import { MapPin, Bed, Bath, Star, Share2, Bookmark, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/button';
 import { getListingById, type Listing } from '@/mockData/mocklisting';
 import { useAuth } from '@/contexts/AuthContext';
@@ -8,6 +8,7 @@ import { favoriteService } from '@/services/favorite.service';
 import { reviewService } from '@/services/review.service';
 import { createOrGetReservation } from '@/services/reservation.service';
 import { ReviewModal } from '@/components/reviewModal';
+import { BookingModal, BookingSummaryModal, type BookingFormData } from '@/components/bookingModal';
 import { toast } from 'sonner';
 
 export const AnnouncementDetail = () => {
@@ -18,7 +19,11 @@ export const AnnouncementDetail = () => {
     const [selectedImage, setSelectedImage] = useState(0);
     const [isFavorite, setIsFavorite] = useState(false);
     const [showReviewModal, setShowReviewModal] = useState(false);
+    const [showBookingModal, setShowBookingModal] = useState(false);
+    const [showSummaryModal, setShowSummaryModal] = useState(false);
+    const [bookingFormData, setBookingFormData] = useState<BookingFormData | null>(null);
     const [isContacting, setIsContacting] = useState(false);
+    const [isSubmittingBooking, setIsSubmittingBooking] = useState(false);
 
     useEffect(() => {
         if (id) {
@@ -31,6 +36,21 @@ export const AnnouncementDetail = () => {
             }
         }
     }, [id, navigate]);
+
+    useEffect(() => {
+        const loadReviews = async () => {
+            if (!listing) return;
+
+            try {
+                const reviews = await reviewService.getReviews(listing.id);
+                setListing(prev => prev ? { ...prev, reviews } : null);
+            } catch (error) {
+                console.error('Error loading reviews:', error);
+            }
+        };
+
+        loadReviews();
+    }, [listing?.id]);
 
     const handleToggleFavorite = async () => {
         if (!isAuthenticated) {
@@ -112,6 +132,45 @@ export const AnnouncementDetail = () => {
         }
     };
 
+    const handleStartBooking = () => {
+        if (!isAuthenticated) {
+            toast.error('Debes iniciar sesión para reservar');
+            navigate('/login');
+            return;
+        }
+
+        if (user?.role !== 'student') {
+            toast.error('Solo los estudiantes pueden reservar habitaciones');
+            return;
+        }
+
+        setShowBookingModal(true);
+    };
+
+    const handleBookingContinue = (formData: BookingFormData) => {
+        setBookingFormData(formData);
+        setShowBookingModal(false);
+        setShowSummaryModal(true);
+    };
+
+    const handleBookingConfirm = async () => {
+        if (!listing || !bookingFormData) return;
+
+        setIsSubmittingBooking(true);
+        try {
+            await createOrGetReservation(listing.id);
+
+            toast.success('¡Solicitud enviada! El propietario recibirá tu solicitud.');
+            setShowSummaryModal(false);
+            setBookingFormData(null);
+        } catch (error: any) {
+            console.error('Error submitting booking:', error);
+            toast.error(error.response?.data?.error || 'Error al enviar solicitud');
+        } finally {
+            setIsSubmittingBooking(false);
+        }
+    };
+
     if (!listing) {
         return (
             <div className="min-h-screen pt-20 flex items-center justify-center">
@@ -125,10 +184,8 @@ export const AnnouncementDetail = () => {
     return (
         <div className="min-h-screen pt-20 pb-10 px-4" style={{ backgroundColor: "var(--roomlock-bg-lighter)" }}>
             <div className="container mx-auto max-w-6xl">
-                {/* Image Gallery */}
                 <div className="mb-8">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {/* Main Image */}
                         <div className="relative h-96 rounded-xl overflow-hidden">
                             <img
                                 src={listing.images[selectedImage]}
@@ -137,7 +194,6 @@ export const AnnouncementDetail = () => {
                             />
                         </div>
 
-                        {/* Thumbnail Grid */}
                         <div className="grid grid-cols-2 gap-4">
                             {listing.images.slice(0, 4).map((image, index) => (
                                 <button
@@ -160,9 +216,7 @@ export const AnnouncementDetail = () => {
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    {/* Left Column - Details */}
                     <div className="lg:col-span-2 space-y-6">
-                        {/* Title and Location */}
                         <div>
                             <div className="flex items-start justify-between mb-2">
                                 <h1 className="text-3xl font-bold" style={{ color: "var(--roomlock-text-primary)" }}>
@@ -190,7 +244,6 @@ export const AnnouncementDetail = () => {
                             </div>
                         </div>
 
-                        {/* Stats */}
                         <div className="flex items-center gap-6 py-4 border-y border-gray-200">
                             <div className="flex items-center gap-2">
                                 <Bed className="h-5 w-5 text-gray-600" />
@@ -202,7 +255,6 @@ export const AnnouncementDetail = () => {
                             </div>
                         </div>
 
-                        {/* Description */}
                         <div className="bg-white p-6 rounded-xl">
                             <h2 className="text-xl font-semibold mb-4" style={{ color: "var(--roomlock-text-primary)" }}>
                                 Descripción
@@ -251,15 +303,21 @@ export const AnnouncementDetail = () => {
                                                             <p className="text-sm text-gray-500">{review.date}</p>
                                                         </div>
                                                         <div className="flex gap-1">
-                                                            {[...Array(5)].map((_, i) => (
-                                                                <Star
-                                                                    key={i}
-                                                                    className={`h-4 w-4 ${i < review.rating
-                                                                        ? 'fill-yellow-400 stroke-yellow-400'
-                                                                        : 'fill-gray-200 stroke-gray-200'
-                                                                        }`}
-                                                                />
-                                                            ))}
+                                                            {[1, 2, 3, 4, 5].map((starNum) => {
+                                                                const isFilled = starNum <= review.rating;
+                                                                return (
+                                                                    <Star
+                                                                        key={starNum}
+                                                                        style={{
+                                                                            width: '16px',
+                                                                            height: '16px',
+                                                                            fill: isFilled ? '#FBBF24' : 'none',
+                                                                            stroke: isFilled ? '#F59E0B' : '#E5E7EB',
+                                                                            strokeWidth: 2,
+                                                                        }}
+                                                                    />
+                                                                );
+                                                            })}
                                                         </div>
                                                     </div>
                                                     <p className="text-gray-700">{review.comment}</p>
@@ -311,6 +369,7 @@ export const AnnouncementDetail = () => {
                             {/* Buttons */}
                             <div className="space-y-3 mb-6">
                                 <Button
+                                    onClick={handleStartBooking}
                                     className="w-full h-12 text-base"
                                     style={{ backgroundColor: "var(--roomlock-cta)", color: "white" }}
                                 >
@@ -322,7 +381,7 @@ export const AnnouncementDetail = () => {
                                     onClick={handleContact}
                                     disabled={isContacting}
                                 >
-                                    <Phone className="h-5 w-5" />
+                                    <MessageCircle className="h-5 w-5" />
                                     {isContacting ? 'Contactando...' : 'Contactar'}
                                 </Button>
                             </div>
@@ -357,6 +416,25 @@ export const AnnouncementDetail = () => {
                 onClose={() => setShowReviewModal(false)}
                 announcementTitle={listing.title}
                 onSubmit={handleSubmitReview}
+            />
+
+            {/* Booking Modals */}
+            <BookingModal
+                isOpen={showBookingModal}
+                onClose={() => setShowBookingModal(false)}
+                announcementTitle={listing.title}
+                onContinue={handleBookingContinue}
+            />
+
+            <BookingSummaryModal
+                isOpen={showSummaryModal}
+                onClose={() => setShowSummaryModal(false)}
+                onConfirm={handleBookingConfirm}
+                announcementTitle={listing.title}
+                ownerName={listing.owner.name}
+                price={listing.price}
+                formData={bookingFormData || { fullName: '', email: '', phone: '', university: '', studentCode: '', moveInDate: '' }}
+                isSubmitting={isSubmittingBooking}
             />
         </div>
     );
