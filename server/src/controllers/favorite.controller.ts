@@ -1,6 +1,6 @@
 import type { Request, Response } from 'express';
-import * as favoriteService from '../services/favorite.service';
-import type { AddFavoriteDTO } from '../DTO/favorite.dto';
+import * as favoriteService from '../services/favorite.service.js';
+import type { AddFavoriteDTO } from '../DTO/favorite.dto.js';
 
 export const getFavorites = async (req: Request, res: Response) => {
     try {

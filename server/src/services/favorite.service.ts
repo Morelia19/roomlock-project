@@ -1,5 +1,5 @@
-import { prisma } from '../index';
-import type { FavoriteAnnouncementResponse } from '../DTO/favorite.dto';
+import { prisma } from '../index.js';
+import type { FavoriteAnnouncementResponse } from '../DTO/favorite.dto.js';
 
 export const getUserFavorites = async (userId: number): Promise<FavoriteAnnouncementResponse[]> => {
     const favorites = await prisma.favorite.findMany({

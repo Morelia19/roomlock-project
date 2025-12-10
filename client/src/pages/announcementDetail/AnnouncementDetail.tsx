@@ -5,6 +5,8 @@ import { Button } from '@/components/button';
 import { getListingById, type Listing } from '@/mockData/mocklisting';
 import { useAuth } from '@/contexts/AuthContext';
 import { favoriteService } from '@/services/favorite.service';
+import { reviewService } from '@/services/review.service';
+import { ReviewModal } from '@/components/reviewModal';
 import { toast } from 'sonner';
 
 export const AnnouncementDetail = () => {
@@ -14,6 +16,7 @@ export const AnnouncementDetail = () => {
     const [listing, setListing] = useState<Listing | null>(null);
     const [selectedImage, setSelectedImage] = useState(0);
     const [isFavorite, setIsFavorite] = useState(false);
+    const [showReviewModal, setShowReviewModal] = useState(false);
 
     useEffect(() => {
         if (id) {
@@ -59,6 +62,26 @@ export const AnnouncementDetail = () => {
         }
     };
 
+    const handleSubmitReview = async (rating: number, comment: string, image?: File) => {
+        if (!listing) return;
+
+        try {
+            // Call API to save review
+            const newReview = await reviewService.addReview(listing.id, rating, comment, image);
+
+            // Add to local state for immediate display
+            setListing({
+                ...listing,
+                reviews: [newReview, ...listing.reviews]
+            });
+
+            toast.success('Valoración publicada exitosamente');
+        } catch (error) {
+            console.error('Error submitting review:', error);
+            toast.error('Error al publicar valoración');
+        }
+    };
+
     if (!listing) {
         return (
             <div className="min-h-screen pt-20 flex items-center justify-center">
@@ -91,8 +114,8 @@ export const AnnouncementDetail = () => {
                                     key={index}
                                     onClick={() => setSelectedImage(index)}
                                     className={`relative h-44 rounded-xl overflow-hidden transition-all ${selectedImage === index
-                                            ? 'ring-4 ring-[var(--roomlock-primary)]'
-                                            : 'hover:opacity-80'
+                                        ? 'ring-4 ring-[var(--roomlock-primary)]'
+                                        : 'hover:opacity-80'
                                         }`}
                                 >
                                     <img
@@ -202,8 +225,8 @@ export const AnnouncementDetail = () => {
                                                                 <Star
                                                                     key={i}
                                                                     className={`h-4 w-4 ${i < review.rating
-                                                                            ? 'fill-yellow-400 stroke-yellow-400'
-                                                                            : 'fill-gray-200 stroke-gray-200'
+                                                                        ? 'fill-yellow-400 stroke-yellow-400'
+                                                                        : 'fill-gray-200 stroke-gray-200'
                                                                         }`}
                                                                 />
                                                             ))}
@@ -220,14 +243,25 @@ export const AnnouncementDetail = () => {
                             )}
 
                             {/* Review Input */}
-                            {isAuthenticated && user?.role === 'student' && (
-                                <div className="mt-6 pt-6 border-t border-gray-200">
-                                    <h3 className="font-medium mb-3">Deja tu valoración y comentario</h3>
-                                    <p className="text-sm text-gray-500">
+                            <div className="mt-6 pt-6 border-t border-gray-200">
+                                {isAuthenticated && user?.role === 'student' ? (
+                                    <div>
+                                        <h3 className="font-medium mb-3">Deja tu valoración y comentario</h3>
+                                        <Button
+                                            onClick={() => setShowReviewModal(true)}
+                                            className="w-full flex items-center justify-center gap-2"
+                                            style={{ backgroundColor: "var(--roomlock-cta)", color: "white" }}
+                                        >
+                                            <Star className="h-5 w-5" />
+                                            Agregar Valoración
+                                        </Button>
+                                    </div>
+                                ) : (
+                                    <p className="text-sm text-gray-500 text-center">
                                         Inicia sesión como estudiante para dejar una valoración.
                                     </p>
-                                </div>
-                            )}
+                                )}
+                            </div>
                         </div>
                     </div>
 
@@ -284,6 +318,14 @@ export const AnnouncementDetail = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Review Modal */}
+            <ReviewModal
+                isOpen={showReviewModal}
+                onClose={() => setShowReviewModal(false)}
+                announcementTitle={listing.title}
+                onSubmit={handleSubmitReview}
+            />
         </div>
     );
 };

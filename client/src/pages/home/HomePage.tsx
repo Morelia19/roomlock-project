@@ -1,14 +1,15 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { MapPin, Home, Shield, CheckCircle } from 'lucide-react';
+import { MapPin, Home, Shield, CheckCircle, Loader2 } from 'lucide-react';
 import { HeroSection } from '@/components/heroSection';
 import { FeaturedListingsSection } from '@/components/featuredListingsSection';
 import { FeaturesSection } from '@/components/featuresSection';
 import { CommunitySection } from '@/components/communitySection';
-import { featuredListings, districts } from "@/mockData/mocklisting";
+import { districts } from "@/mockData/mocklisting";
 import { headerBg } from '@/assets';
 import { useAuth } from '@/contexts/AuthContext';
 import { favoriteService } from '@/services/favorite.service';
+import { announcementService } from '@/services/announcement.service';
 import { toast } from 'sonner';
 
 export const HomePage = () => {
@@ -17,6 +18,11 @@ export const HomePage = () => {
     const [searchQuery, setSearchQuery] = useState("");
     const listingsScrollRef = useRef<HTMLDivElement>(null);
     const [favorites, setFavorites] = useState<Set<number>>(new Set());
+
+    // New state for announcements
+    const [listings, setListings] = useState<any[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
     const handleSearch = () => {
         if (searchQuery.trim()) {
@@ -37,6 +43,26 @@ export const HomePage = () => {
             });
         }
     };
+
+    // Load announcements from API
+    useEffect(() => {
+        const loadAnnouncements = async () => {
+            try {
+                setIsLoading(true);
+                const data = await announcementService.getFeaturedAnnouncements();
+                setListings(data);
+                setError(null);
+            } catch (err) {
+                console.error('Error loading announcements:', err);
+                setError('Error al cargar anuncios');
+                toast.error('No se pudieron cargar los anuncios');
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        loadAnnouncements();
+    }, []);
 
     // Load favorites when user is authenticated as student
     useEffect(() => {
@@ -128,15 +154,37 @@ export const HomePage = () => {
                 onDistrictClick={handleDistrictClick}
             />
 
-            <FeaturedListingsSection
-                listings={featuredListings.slice(0, 4)}
-                scrollRef={listingsScrollRef}
-                onScroll={(direction) => scroll(listingsScrollRef, direction)}
-                onListingClick={(id) => navigate(`/listing/${id}`)}
-                showFavoriteButton={isAuthenticated && user?.role === 'student'}
-                favorites={favorites}
-                onToggleFavorite={handleToggleFavorite}
-            />
+            {isLoading ? (
+                <div className="py-16 px-4 flex justify-center items-center">
+                    <div className="text-center">
+                        <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4" style={{ color: "var(--roomlock-primary)" }} />
+                        <p style={{ color: "var(--roomlock-text-secondary)" }}>Cargando anuncios...</p>
+                    </div>
+                </div>
+            ) : error ? (
+                <div className="py-16 px-4 flex justify-center items-center">
+                    <div className="text-center">
+                        <p className="text-red-600 mb-4">{error}</p>
+                        <button
+                            onClick={() => window.location.reload()}
+                            className="px-4 py-2 rounded-lg"
+                            style={{ backgroundColor: "var(--roomlock-primary)", color: "white" }}
+                        >
+                            Reintentar
+                        </button>
+                    </div>
+                </div>
+            ) : (
+                <FeaturedListingsSection
+                    listings={listings}
+                    scrollRef={listingsScrollRef}
+                    onScroll={(direction) => scroll(listingsScrollRef, direction)}
+                    onListingClick={(id) => navigate(`/listing/${id}`)}
+                    showFavoriteButton={isAuthenticated && user?.role === 'student'}
+                    favorites={favorites}
+                    onToggleFavorite={handleToggleFavorite}
+                />
+            )}
 
             <FeaturesSection features={features} />
 

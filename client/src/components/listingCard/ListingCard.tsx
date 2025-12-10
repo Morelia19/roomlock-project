@@ -29,10 +29,20 @@ export const ListingCard: FC<ListingCardProps> = ({
     onToggleFavorite,
     showFavoriteButton = false
 }) => {
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            onClick();
+        }
+    };
+
     return (
-        <button
+        <div
             onClick={onClick}
-            className="text-left transition-transform hover:scale-105 group h-full"
+            onKeyDown={handleKeyDown}
+            role="button"
+            tabIndex={0}
+            className="text-left transition-transform hover:scale-105 group h-full cursor-pointer"
         >
             <div className="bg-white rounded-xl overflow-hidden border border-gray-100 hover:shadow-lg transition-shadow h-full flex flex-col">
                 <div className="relative h-56 flex-shrink-0">
@@ -87,6 +97,6 @@ export const ListingCard: FC<ListingCardProps> = ({
                     </div>
                 </div>
             </div>
-        </button>
+        </div>
     );
 };

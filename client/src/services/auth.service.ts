@@ -31,7 +31,7 @@ export interface AuthResponse {
 }
 
 class AuthService {
-    private readonly API_URL = 'https://roomlock-api.onrender.com/api';
+    private readonly API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
     private authListeners: Array<() => void> = [];
 
     // Subscribe to auth state changes
@@ -66,7 +66,7 @@ class AuthService {
             payload.university = data.university;
         }
 
-        const response = await fetch(`${this.API_URL}/auth/register`, {
+        const response = await fetch(`${this.API_URL}/api/auth/register`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -84,7 +84,7 @@ class AuthService {
     }
 
     async login(data: LoginData): Promise<AuthResponse> {
-        const response = await fetch(`${this.API_URL}/auth/login`, {
+        const response = await fetch(`${this.API_URL}/api/auth/login`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
