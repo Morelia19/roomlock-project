@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Send, User as UserIcon } from 'lucide-react';
 import { messageService, type Conversation, type ConversationMessages } from '@/services/message.service';
 import { useAuth } from '@/contexts/AuthContext';
@@ -7,6 +8,7 @@ import { toast } from 'sonner';
 
 export const MessagesPage = () => {
     const { user } = useAuth();
+    const [searchParams] = useSearchParams();
     const [conversations, setConversations] = useState<Conversation[]>([]);
     const [selectedConversation, setSelectedConversation] = useState<ConversationMessages | null>(null);
     const [isLoadingConversations, setIsLoadingConversations] = useState(true);
@@ -19,6 +21,30 @@ export const MessagesPage = () => {
     useEffect(() => {
         loadConversations();
     }, []);
+
+    // Auto-open conversation from URL parameter
+    useEffect(() => {
+        const reservationParam = searchParams.get('reservation');
+        if (reservationParam && conversations.length > 0) {
+            const reservationId = parseInt(reservationParam, 10);
+            if (!isNaN(reservationId)) {
+                // Check if this conversation exists in the list
+                const conversationExists = conversations.some(
+                    conv => conv.reservation_id === reservationId
+                );
+
+                if (conversationExists) {
+                    // Load the conversation messages
+                    loadConversationMessages(reservationId);
+                } else {
+                    // Reload conversations to get the new one
+                    loadConversations().then(() => {
+                        loadConversationMessages(reservationId);
+                    });
+                }
+            }
+        }
+    }, [searchParams, conversations.length]);
 
     // Scroll to bottom when messages change
     useEffect(() => {
@@ -34,9 +60,11 @@ export const MessagesPage = () => {
             setIsLoadingConversations(true);
             const data = await messageService.getConversations();
             setConversations(data);
+            return data;
         } catch (error) {
             console.error('Error loading conversations:', error);
             toast.error('Error al cargar conversaciones');
+            return [];
         } finally {
             setIsLoadingConversations(false);
         }
