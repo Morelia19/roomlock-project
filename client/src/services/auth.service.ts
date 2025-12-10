@@ -12,22 +12,27 @@ export interface LoginData {
     password: string;
 }
 
+export interface User {
+    id: number;
+    name: string;
+    email: string;
+    role: string;
+    phone?: string | null;
+    university?: string | null;
+}
+
 export interface AuthResponse {
-    user: {
-        id: number;
-        name: string;
-        email: string;
-        role: string;
-        phone: string;
+    message: string;
+    data: {
+        user: User;
+        token?: string;
     };
-    token?: string;
 }
 
 class AuthService {
     private readonly API_URL = 'https://roomlock-api.onrender.com/api';
 
     async register(data: RegisterData): Promise<AuthResponse> {
-        // Formatear el teléfono solo si existe (para propietarios)
         const payload: any = {
             name: data.name,
             email: data.email,
@@ -35,12 +40,10 @@ class AuthService {
             role: data.role,
         };
 
-        // Agregar phone solo si existe (owners)
         if (data.phone) {
             payload.phone = this.formatPhoneNumber(data.phone);
         }
 
-        // Agregar university solo si existe (students)
         if (data.university) {
             payload.university = data.university;
         }
@@ -77,8 +80,10 @@ class AuthService {
             throw new Error(responseData.error || 'Error al iniciar sesión');
         }
 
-        if (responseData.token) {
-            localStorage.setItem('token', responseData.token);
+        // Store token and user in localStorage
+        if (responseData.data?.token) {
+            localStorage.setItem('token', responseData.data.token);
+            localStorage.setItem('user', JSON.stringify(responseData.data.user));
         }
 
         return responseData;
@@ -86,10 +91,16 @@ class AuthService {
 
     logout(): void {
         localStorage.removeItem('token');
+        localStorage.removeItem('user');
     }
 
     getToken(): string | null {
         return localStorage.getItem('token');
+    }
+
+    getCurrentUser(): User | null {
+        const userStr = localStorage.getItem('user');
+        return userStr ? JSON.parse(userStr) : null;
     }
 
     isAuthenticated(): boolean {
@@ -97,7 +108,7 @@ class AuthService {
     }
 
     private formatPhoneNumber(phone: string): string {
-        const cleaned = phone.replace(/\D/g, '');
+        const cleaned = phone.replaceAll(/\D/g, '');
         return `+51 ${cleaned}`;
     }
 

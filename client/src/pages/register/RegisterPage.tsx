@@ -1,11 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Mail, Lock, User, Key, Phone, Building2 } from "lucide-react";
+import { Mail, Lock, User, Key, Building2 } from "lucide-react";
 import { Button } from "@/components/button";
-import { Input } from "@/components/input";
-import { Label } from "@/components/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/tabs";
+import { FormField, PhoneField } from "@/components/form";
 import { toast } from "sonner";
 import { authService } from "@/services/auth.service";
 
@@ -27,13 +26,6 @@ export const RegisterPage = () => {
         password: "",
         phone: ""
     });
-
-    // Manejar cambio de teléfono para propietarios
-    const handleOwnerPhoneChange = (value: string) => {
-        // Solo permitir números y espacios
-        const cleaned = value.replace(/[^\d\s]/g, "");
-        setOwnerData({ ...ownerData, phone: cleaned });
-    };
 
     const handleStudentSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -123,89 +115,55 @@ export const RegisterPage = () => {
                     </CardHeader>
                     <CardContent>
                         <Tabs defaultValue="student" className="w-full">
-                            <TabsList className="grid w-full grid-cols-2">
+                            <TabsList className="w-full">
                                 <TabsTrigger value="student">Estudiante</TabsTrigger>
                                 <TabsTrigger value="owner">Propietario</TabsTrigger>
                             </TabsList>
 
                             <TabsContent value="student" className="mt-6">
                                 <form onSubmit={handleStudentSubmit} className="space-y-4">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="student-name">Nombre Completo</Label>
-                                        <div className="relative">
-                                            <User
-                                                className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2"
-                                                style={{ color: "var(--roomlock-text-secondary)" }}
-                                            />
-                                            <Input
-                                                id="student-name"
-                                                placeholder="Juan Pérez"
-                                                value={studentData.name}
-                                                onChange={(e) => setStudentData({ ...studentData, name: e.target.value })}
-                                                className="pl-10"
-                                                required
-                                            />
-                                        </div>
-                                    </div>
+                                    <FormField
+                                        id="student-name"
+                                        label="Nombre Completo"
+                                        placeholder="Juan Pérez"
+                                        value={studentData.name}
+                                        onChange={(value) => setStudentData({ ...studentData, name: value })}
+                                        icon={User}
+                                        required
+                                    />
 
-                                    <div className="space-y-2">
-                                        <Label htmlFor="student-email">Correo Institucional</Label>
-                                        <div className="relative">
-                                            <Mail
-                                                className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2"
-                                                style={{ color: "var(--roomlock-text-secondary)" }}
-                                            />
-                                            <Input
-                                                id="student-email"
-                                                type="email"
-                                                placeholder="estudiante@universidad.edu.pe"
-                                                value={studentData.email}
-                                                onChange={(e) => setStudentData({ ...studentData, email: e.target.value })}
-                                                className="pl-10"
-                                                required
-                                            />
-                                        </div>
-                                        <p className="text-sm" style={{ color: "var(--roomlock-text-secondary)" }}>
-                                            Debe ser un correo universitario válido
-                                        </p>
-                                    </div>
+                                    <FormField
+                                        id="student-email"
+                                        label="Correo Institucional"
+                                        type="email"
+                                        placeholder="estudiante@universidad.edu.pe"
+                                        value={studentData.email}
+                                        onChange={(value) => setStudentData({ ...studentData, email: value })}
+                                        icon={Mail}
+                                        helperText="Debe ser un correo universitario válido"
+                                        required
+                                    />
 
-                                    <div className="space-y-2">
-                                        <Label htmlFor="student-university">Universidad</Label>
-                                        <div className="relative">
-                                            <Building2
-                                                className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2"
-                                                style={{ color: "var(--roomlock-text-secondary)" }}
-                                            />
-                                            <Input
-                                                id="student-university"
-                                                placeholder="Universidad Tecnológica del Perú"
-                                                value={studentData.university}
-                                                onChange={(e) => setStudentData({ ...studentData, university: e.target.value })}
-                                                className="pl-10"
-                                                required
-                                            />
-                                        </div>
-                                    </div>
+                                    <FormField
+                                        id="student-university"
+                                        label="Universidad"
+                                        placeholder="Universidad Tecnológica del Perú"
+                                        value={studentData.university}
+                                        onChange={(value) => setStudentData({ ...studentData, university: value })}
+                                        icon={Building2}
+                                        required
+                                    />
 
-                                    <div className="space-y-2">
-                                        <Label htmlFor="student-password">Contraseña</Label>
-                                        <div className="relative">
-                                            <Lock
-                                                className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2"
-                                                style={{ color: "var(--roomlock-text-secondary)" }}
-                                            />
-                                            <Input
-                                                id="student-password"
-                                                type="password"
-                                                placeholder="••••••••"
-                                                value={studentData.password}
-                                                onChange={(e) => setStudentData({ ...studentData, password: e.target.value })}
-                                                className="pl-10"
-                                                required
-                                            />
-                                        </div>
-                                    </div>
+                                    <FormField
+                                        id="student-password"
+                                        label="Contraseña"
+                                        type="password"
+                                        placeholder="••••••••"
+                                        value={studentData.password}
+                                        onChange={(value) => setStudentData({ ...studentData, password: value })}
+                                        icon={Lock}
+                                        required
+                                    />
 
                                     {error && (
                                         <div
@@ -232,87 +190,46 @@ export const RegisterPage = () => {
 
                             <TabsContent value="owner" className="mt-6">
                                 <form onSubmit={handleOwnerSubmit} className="space-y-4">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="owner-name">Nombre Completo</Label>
-                                        <div className="relative">
-                                            <User
-                                                className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2"
-                                                style={{ color: "var(--roomlock-text-secondary)" }}
-                                            />
-                                            <Input
-                                                id="owner-name"
-                                                placeholder="María García"
-                                                value={ownerData.name}
-                                                onChange={(e) => setOwnerData({ ...ownerData, name: e.target.value })}
-                                                className="pl-10"
-                                                required
-                                            />
-                                        </div>
-                                    </div>
+                                    <FormField
+                                        id="owner-name"
+                                        label="Nombre Completo"
+                                        placeholder="María García"
+                                        value={ownerData.name}
+                                        onChange={(value) => setOwnerData({ ...ownerData, name: value })}
+                                        icon={User}
+                                        required
+                                    />
 
-                                    <div className="space-y-2">
-                                        <Label htmlFor="owner-email">Correo Electrónico</Label>
-                                        <div className="relative">
-                                            <Mail
-                                                className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2"
-                                                style={{ color: "var(--roomlock-text-secondary)" }}
-                                            />
-                                            <Input
-                                                id="owner-email"
-                                                type="email"
-                                                placeholder="propietario@email.com"
-                                                value={ownerData.email}
-                                                onChange={(e) => setOwnerData({ ...ownerData, email: e.target.value })}
-                                                className="pl-10"
-                                                required
-                                            />
-                                        </div>
-                                    </div>
+                                    <FormField
+                                        id="owner-email"
+                                        label="Correo Electrónico"
+                                        type="email"
+                                        placeholder="propietario@email.com"
+                                        value={ownerData.email}
+                                        onChange={(value) => setOwnerData({ ...ownerData, email: value })}
+                                        icon={Mail}
+                                        required
+                                    />
 
-                                    <div className="space-y-2">
-                                        <Label htmlFor="owner-phone">Teléfono</Label>
-                                        <div className="relative">
-                                            <Phone
-                                                className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2"
-                                                style={{ color: "var(--roomlock-text-secondary)" }}
-                                            />
-                                            <div className="flex items-center">
-                                                <span
-                                                    className="absolute left-10 text-sm"
-                                                    style={{ color: "var(--roomlock-text-secondary)" }}
-                                                >
-                                                    +51
-                                                </span>
-                                                <Input
-                                                    id="owner-phone"
-                                                    placeholder="987 654 321"
-                                                    value={ownerData.phone}
-                                                    onChange={(e) => handleOwnerPhoneChange(e.target.value)}
-                                                    className="pl-20"
-                                                    required
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
+                                    <PhoneField
+                                        id="owner-phone"
+                                        label="Teléfono"
+                                        placeholder="987 654 321"
+                                        value={ownerData.phone}
+                                        onChange={(value) => setOwnerData({ ...ownerData, phone: value })}
+                                        required
+                                    />
 
-                                    <div className="space-y-2">
-                                        <Label htmlFor="owner-password">Contraseña</Label>
-                                        <div className="relative">
-                                            <Lock
-                                                className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2"
-                                                style={{ color: "var(--roomlock-text-secondary)" }}
-                                            />
-                                            <Input
-                                                id="owner-password"
-                                                type="password"
-                                                placeholder="••••••••"
-                                                value={ownerData.password}
-                                                onChange={(e) => setOwnerData({ ...ownerData, password: e.target.value })}
-                                                className="pl-10"
-                                                required
-                                            />
-                                        </div>
-                                    </div>
+                                    <FormField
+                                        id="owner-password"
+                                        label="Contraseña"
+                                        type="password"
+                                        placeholder="••••••••"
+                                        value={ownerData.password}
+                                        onChange={(value) => setOwnerData({ ...ownerData, password: value })}
+                                        icon={Lock}
+                                        required
+                                    />
 
                                     {error && (
                                         <div

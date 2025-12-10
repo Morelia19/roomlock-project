@@ -6,3 +6,8 @@ export interface RegistroUsuarioDTO {
   phone?: string;
   university?: string;
 }
+
+export interface LoginDTO {
+  email: string;
+  password: string;
+}

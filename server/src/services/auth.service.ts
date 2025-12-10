@@ -1,6 +1,7 @@
 import { prisma } from '../index.js';
-import type { RegistroUsuarioDTO } from '../DTO/auth.dto.js';
+import type { RegistroUsuarioDTO, LoginDTO } from '../DTO/auth.dto.js';
 import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 
 export const registerUser = async (data: RegistroUsuarioDTO) => {
     const userExist = await prisma.user.findUnique({
@@ -27,4 +28,33 @@ export const registerUser = async (data: RegistroUsuarioDTO) => {
 
     const { password: _, ...userWithoutPassword } = newUser;
     return userWithoutPassword;
+};
+
+export const loginUser = async (data: LoginDTO) => {
+    const user = await prisma.user.findUnique({
+        where: { email: data.email },
+    });
+
+    if (!user) {
+        throw new Error('Credenciales inválidas');
+    }
+
+    const isPasswordValid = await bcrypt.compare(data.password, user.password);
+
+    if (!isPasswordValid) {
+        throw new Error('Credenciales inválidas');
+    }
+
+    const token = jwt.sign(
+        { id: user.id, email: user.email, role: user.role },
+        process.env.JWT_SECRET || 'secret-key',
+        { expiresIn: '7d' }
+    );
+
+    const { password: _, ...userWithoutPassword } = user;
+
+    return {
+        token,
+        user: userWithoutPassword,
+    };
 };
