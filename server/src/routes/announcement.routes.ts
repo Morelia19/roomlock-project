@@ -8,6 +8,9 @@ const router = Router();
 // Get all announcements (public)
 router.get('/', announcementController.getAnnouncements);
 
+// Get my announcements (requires authentication)
+router.get('/my-announcements', authenticateToken, announcementController.getMyAnnouncements);
+
 // Get reviews for an announcement
 router.get('/:announcementId/reviews', reviewController.getAnnouncementReviews);
 

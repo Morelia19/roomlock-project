@@ -7,6 +7,7 @@ import { MessagesPage } from '@/pages/messages/MessagesPage';
 import { FavoritesPage } from '@/pages/favorites/FavoritesPage';
 import { SearchPage } from '@/pages/search/SearchPage';
 import { AnnouncementDetail } from '@/pages/announcementDetail';
+import { MyAnnouncementsPage } from '@/pages/myAnnouncements/MyAnnouncementsPage';
 import { AuthProvider } from '@/contexts/AuthContext';
 
 
@@ -25,6 +26,7 @@ export const AppRouter = () => {
             {/* Rutas Protegidas */}
             <Route path="/messages" element={<MessagesPage />} />
             <Route path="/favorites" element={<FavoritesPage />} />
+            <Route path="/my-announcements" element={<MyAnnouncementsPage />} />
 
             {/* Ruta por defecto temporal */}
             <Route path="/" element={<HomePage />} />

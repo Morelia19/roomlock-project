@@ -28,6 +28,11 @@ class AnnouncementService {
     async getFeaturedAnnouncements(): Promise<AnnouncementResponse[]> {
         return this.getAnnouncements(4);
     }
+
+    async getMyAnnouncements(): Promise<any> {
+        const response = await api.get('/announcements/my-announcements');
+        return response.data.data;
+    }
 }
 
 export const announcementService = new AnnouncementService();

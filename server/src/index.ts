@@ -6,6 +6,7 @@ import authRoutes from './routes/auth.routes.js';
 import messageRoutes from './routes/message.routes.js';
 import favoriteRoutes from './routes/favorite.routes.js';
 import announcementRoutes from './routes/announcement.routes.js';
+import reservationRoutes from './routes/reservation.routes.js';
 
 dotenv.config();
 const app = express();
@@ -20,6 +21,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/favorites', favoriteRoutes);
 app.use('/api/announcements', announcementRoutes);
+app.use('/api/reservations', reservationRoutes);
 
 app.get('/api/status', (req, res) => {
     res.json({ mensaje: 'Servidor RoomLock activo 🚀' });

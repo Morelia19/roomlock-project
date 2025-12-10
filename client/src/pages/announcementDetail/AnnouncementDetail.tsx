@@ -6,6 +6,7 @@ import { getListingById, type Listing } from '@/mockData/mocklisting';
 import { useAuth } from '@/contexts/AuthContext';
 import { favoriteService } from '@/services/favorite.service';
 import { reviewService } from '@/services/review.service';
+import { createOrGetReservation } from '@/services/reservation.service';
 import { ReviewModal } from '@/components/reviewModal';
 import { toast } from 'sonner';
 
@@ -17,6 +18,7 @@ export const AnnouncementDetail = () => {
     const [selectedImage, setSelectedImage] = useState(0);
     const [isFavorite, setIsFavorite] = useState(false);
     const [showReviewModal, setShowReviewModal] = useState(false);
+    const [isContacting, setIsContacting] = useState(false);
 
     useEffect(() => {
         if (id) {
@@ -79,6 +81,34 @@ export const AnnouncementDetail = () => {
         } catch (error) {
             console.error('Error submitting review:', error);
             toast.error('Error al publicar valoración');
+        }
+    };
+
+    const handleContact = async () => {
+        if (!isAuthenticated) {
+            toast.error('Debes iniciar sesión para contactar al propietario');
+            navigate('/login');
+            return;
+        }
+
+        if (user?.role !== 'student') {
+            toast.error('Solo los estudiantes pueden contactar propietarios');
+            return;
+        }
+
+        if (!listing) return;
+
+        setIsContacting(true);
+        try {
+            const result = await createOrGetReservation(listing.id);
+            toast.success('Redirigiendo a mensajes...');
+            // Navigate to messages page with the reservation ID
+            navigate(`/messages?reservation=${result.data.id}`);
+        } catch (error: any) {
+            console.error('Error creating reservation:', error);
+            toast.error(error.response?.data?.error || 'Error al contactar propietario');
+        } finally {
+            setIsContacting(false);
         }
     };
 
@@ -289,9 +319,11 @@ export const AnnouncementDetail = () => {
                                 <Button
                                     variant="outline"
                                     className="w-full h-12 text-base flex items-center justify-center gap-2"
+                                    onClick={handleContact}
+                                    disabled={isContacting}
                                 >
                                     <Phone className="h-5 w-5" />
-                                    Contactar
+                                    {isContacting ? 'Contactando...' : 'Contactar'}
                                 </Button>
                             </div>
 
