@@ -10,4 +10,5 @@ export interface RegistroUsuarioDTO {
 export interface LoginDTO {
   email: string;
   password: string;
+  role: 'student' | 'owner' | 'admin';
 }

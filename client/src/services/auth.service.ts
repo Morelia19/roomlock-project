@@ -10,6 +10,7 @@ export interface RegisterData {
 export interface LoginData {
     email: string;
     password: string;
+    role: 'student' | 'owner' | 'admin';
 }
 
 export interface User {
@@ -31,6 +32,23 @@ export interface AuthResponse {
 
 class AuthService {
     private readonly API_URL = 'https://roomlock-api.onrender.com/api';
+    private authListeners: Array<() => void> = [];
+
+    // Subscribe to auth state changes
+    onAuthChange(callback: () => void) {
+        console.log('📝 New subscriber added, total:', this.authListeners.length + 1);
+        this.authListeners.push(callback);
+        // Return unsubscribe function
+        return () => {
+            this.authListeners = this.authListeners.filter(cb => cb !== callback);
+            console.log('📝 Subscriber removed, total:', this.authListeners.length);
+        };
+    }
+
+    private notifyAuthChange() {
+        console.log('📢 Notifying', this.authListeners.length, 'listeners of auth change');
+        this.authListeners.forEach(callback => callback());
+    }
 
     async register(data: RegisterData): Promise<AuthResponse> {
         const payload: any = {
@@ -84,6 +102,7 @@ class AuthService {
         if (responseData.data?.token) {
             localStorage.setItem('token', responseData.data.token);
             localStorage.setItem('user', JSON.stringify(responseData.data.user));
+            this.notifyAuthChange(); // Notify listeners
         }
 
         return responseData;
@@ -92,6 +111,10 @@ class AuthService {
     logout(): void {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
+        // Use setTimeout to ensure localStorage operations complete
+        setTimeout(() => {
+            this.notifyAuthChange(); // Notify listeners
+        }, 0);
     }
 
     getToken(): string | null {
@@ -118,3 +141,4 @@ class AuthService {
 }
 
 export const authService = new AuthService();
+

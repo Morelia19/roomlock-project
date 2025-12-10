@@ -39,6 +39,11 @@ export const loginUser = async (data: LoginDTO) => {
         throw new Error('Credenciales inválidas');
     }
 
+    // Validate role matches
+    if (user.role !== data.role) {
+        throw new Error('Credenciales inválidas');
+    }
+
     const isPasswordValid = await bcrypt.compare(data.password, user.password);
 
     if (!isPasswordValid) {

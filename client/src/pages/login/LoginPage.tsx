@@ -6,13 +6,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/tabs";
 import { FormField } from "@/components/form";
 import { toast } from "sonner";
-import { authService } from "@/services/auth.service";
+import { useAuth } from "@/contexts/AuthContext";
 
 export const LoginPage = () => {
     const navigate = useNavigate();
+    const { login } = useAuth();
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
-    const [activeTab, setActiveTab] = useState("student");
+    const [activeTab, setActiveTab] = useState<'student' | 'owner' | 'admin'>("student");
 
     const [loginData, setLoginData] = useState({
         email: "",
@@ -25,7 +26,7 @@ export const LoginPage = () => {
         setIsLoading(true);
 
         try {
-            await authService.login(loginData);
+            await login(loginData.email, loginData.password, activeTab);
 
             toast.success("¡Inicio de sesión exitoso!");
             navigate("/"); // Redirect to home or dashboard
@@ -92,7 +93,11 @@ export const LoginPage = () => {
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <Tabs defaultValue="student" className="w-full" onValueChange={setActiveTab}>
+                        <Tabs
+                            defaultValue="student"
+                            className="w-full"
+                            onValueChange={(value) => setActiveTab(value as 'student' | 'owner' | 'admin')}
+                        >
                             <TabsList className="w-full">
                                 <TabsTrigger value="student">Estudiante</TabsTrigger>
                                 <TabsTrigger value="owner">Propietario</TabsTrigger>
