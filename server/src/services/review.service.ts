@@ -1,4 +1,4 @@
-import { prisma } from '../index';
+import { prisma } from '../index.js';
 
 interface AddReviewData {
     userId: number;

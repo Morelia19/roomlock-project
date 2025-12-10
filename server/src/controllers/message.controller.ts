@@ -1,6 +1,6 @@
 import type { Request, Response } from 'express';
-import * as messageService from '../services/message.service';
-import type { SendMessageDTO } from '../DTO/message.dto';
+import * as messageService from '../services/message.service.js';
+import type { SendMessageDTO } from '../DTO/message.dto.js';
 
 export const getConversations = async (req: Request, res: Response) => {
     try {

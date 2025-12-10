@@ -1,5 +1,5 @@
-import { prisma } from '../index';
-import type { SendMessageDTO, ConversationResponse, ConversationMessagesResponse, MessageResponse } from '../DTO/message.dto';
+import { prisma } from '../index.js';
+import type { SendMessageDTO, ConversationResponse, ConversationMessagesResponse, MessageResponse } from '../DTO/message.dto.js';
 
 export const getUserConversations = async (userId: number): Promise<ConversationResponse[]> => {
     // Get all reservations where user is either student or owner
