@@ -163,8 +163,8 @@ export const MessagesPage = () => {
         <div className="min-h-screen pt-24 pb-4 px-4" style={{ backgroundColor: "var(--roomlock-bg-lighter)" }}>
             <div className="container mx-auto">
                 <div className="flex gap-6" style={{ height: 'calc(100vh - 140px)' }}>
-                    {/* Conversations List - 1/4 width */}
-                    <div className="w-1/4 min-w-[250px] bg-white rounded-lg border overflow-hidden flex flex-col">
+                    {/* Conversations List - Fixed narrow width */}
+                    <div className="w-80 bg-white rounded-lg border overflow-hidden flex flex-col">
                         <div className="p-4 border-b">
                             <h2 className="text-xl font-semibold flex items-center justify-between">
                                 Mensajes
@@ -273,11 +273,12 @@ export const MessagesPage = () => {
                                             No hay mensajes aún. ¡Envía el primero!
                                         </div>
                                     ) : (
-                                        selectedConversation.messages.map((message) => {
+                                        selectedConversation.messages.map((message, index) => {
                                             const isOwnMessage = message.sender_id === user?.id;
+                                            console.log('Rendering message:', message.id, message.content);
                                             return (
                                                 <div
-                                                    key={message.id}
+                                                    key={`${message.id}-${index}`}
                                                     className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'}`}
                                                 >
                                                     <div
