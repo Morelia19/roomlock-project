@@ -17,27 +17,22 @@ export const MessagesPage = () => {
     const [isSending, setIsSending] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
-    // Load conversations on mount
     useEffect(() => {
         loadConversations();
     }, []);
 
-    // Auto-open conversation from URL parameter
     useEffect(() => {
         const reservationParam = searchParams.get('reservation');
         if (reservationParam && conversations.length > 0) {
             const reservationId = parseInt(reservationParam, 10);
             if (!isNaN(reservationId)) {
-                // Check if this conversation exists in the list
                 const conversationExists = conversations.some(
                     conv => conv.reservation_id === reservationId
                 );
 
                 if (conversationExists) {
-                    // Load the conversation messages
                     loadConversationMessages(reservationId);
                 } else {
-                    // Reload conversations to get the new one
                     loadConversations().then(() => {
                         loadConversationMessages(reservationId);
                     });
@@ -46,7 +41,6 @@ export const MessagesPage = () => {
         }
     }, [searchParams, conversations.length]);
 
-    // Scroll to bottom when messages change
     useEffect(() => {
         scrollToBottom();
     }, [selectedConversation?.messages]);
@@ -99,7 +93,6 @@ export const MessagesPage = () => {
                 messageText
             );
 
-            // Optimistic UI update - add message immediately to state
             setSelectedConversation({
                 ...selectedConversation,
                 messages: [
@@ -112,7 +105,7 @@ export const MessagesPage = () => {
         } catch (error) {
             console.error('Error sending message:', error);
             toast.error('Error al enviar mensaje');
-            setNewMessage(messageText); // Restore message on error
+            setNewMessage(messageText);
         } finally {
             setIsSending(false);
         }
@@ -150,7 +143,6 @@ export const MessagesPage = () => {
         <div className="min-h-screen pt-24 pb-4 px-4" style={{ backgroundColor: "var(--roomlock-bg-lighter)" }}>
             <div className="container mx-auto">
                 <div className="flex gap-6" style={{ height: 'calc(100vh - 140px)' }}>
-                    {/* Conversations List - Fixed narrow width */}
                     <div className="w-80 bg-white rounded-lg border overflow-hidden flex flex-col">
                         <div className="p-4 border-b">
                             <h2 className="text-xl font-semibold flex items-center justify-between">
@@ -222,7 +214,6 @@ export const MessagesPage = () => {
                         </div>
                     </div>
 
-                    {/* Messages Area - 3/4 width */}
                     <div className="flex-1 bg-white rounded-lg border overflow-hidden flex flex-col">
                         {!selectedConversation ? (
                             <div className="flex-1 flex items-center justify-center text-gray-500">
@@ -233,7 +224,6 @@ export const MessagesPage = () => {
                             </div>
                         ) : (
                             <>
-                                {/* Conversation Header */}
                                 <div className="p-4 border-b">
                                     <div className="flex items-center gap-3">
                                         <div
@@ -248,8 +238,6 @@ export const MessagesPage = () => {
                                         </div>
                                     </div>
                                 </div>
-
-                                {/* Messages */}
                                 <div className="flex-1 overflow-y-auto p-4 space-y-4">
                                     {isLoadingMessages ? (
                                         <div className="text-center text-gray-500">
@@ -291,7 +279,6 @@ export const MessagesPage = () => {
                                     <div ref={messagesEndRef} />
                                 </div>
 
-                                {/* Message Input */}
                                 <form onSubmit={handleSendMessage} className="p-4 border-t">
                                     <div className="flex gap-2">
                                         <input

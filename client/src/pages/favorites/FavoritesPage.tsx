@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Heart, Trash2 } from 'lucide-react';
+import { Heart } from 'lucide-react';
 import { favoriteService, type FavoriteAnnouncement } from '@/services/favorite.service';
+import { ListingCard } from '@/components/listingCard';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 
@@ -15,8 +16,8 @@ export const FavoritesPage = () => {
 
     const loadFavorites = async () => {
         try {
-            setIsLoading(true);
-            const data = await favoriteService.getFavorites();
+                setIsLoading(true);
+                const data = await favoriteService.getFavorites();
             setFavorites(data);
         } catch (error) {
             console.error('Error loading favorites:', error);
@@ -26,7 +27,9 @@ export const FavoritesPage = () => {
         }
     };
 
-    const handleRemoveFavorite = async (announcementId: number) => {
+    const handleToggleFavorite = async (e: React.MouseEvent, announcementId: number) => {
+        e.stopPropagation(); // Prevent card click event
+
         try {
             await favoriteService.removeFavorite(announcementId);
             setFavorites(prev => prev.filter(fav => fav.id !== announcementId));
@@ -44,7 +47,6 @@ export const FavoritesPage = () => {
     return (
         <div className="min-h-screen py-8 px-4" style={{ backgroundColor: 'var(--roomlock-bg-lighter)' }}>
             <div className="container mx-auto max-w-7xl">
-                {/* Header */}
                 <div className="mb-8">
                     <h1 className="text-2xl font-semibold mb-2" style={{ color: 'var(--roomlock-text-primary)' }}>
                         Mis Favoritos
@@ -54,7 +56,6 @@ export const FavoritesPage = () => {
                     </p>
                 </div>
 
-                {/* Content */}
                 {isLoading ? (
                     <div className="text-center py-12">
                         <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2" style={{ borderColor: 'var(--roomlock-primary)' }}></div>
@@ -73,74 +74,20 @@ export const FavoritesPage = () => {
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                         {favorites.map((property) => (
-                            <div key={property.id} className="relative">
-                                <button
-                                    onClick={() => handleListingClick(property.id)}
-                                    className="text-left transition-transform hover:scale-105 group h-full w-full"
-                                >
-                                    <div className="bg-white rounded-xl overflow-hidden border border-gray-100 hover:shadow-lg transition-shadow h-full flex flex-col">
-                                        {/* Image with Heart */}
-                                        <div className="relative h-56 flex-shrink-0">
-                                            <img
-                                                src={property.images[0] || '/placeholder.svg'}
-                                                alt={property.title}
-                                                className="h-full w-full object-cover"
-                                            />
-                                            {/* Heart Icon */}
-                                            <div className="absolute top-3 right-3 bg-white rounded-full p-2 shadow-md">
-                                                <Heart
-                                                    className="h-5 w-5"
-                                                    fill="var(--roomlock-cta)"
-                                                    stroke="var(--roomlock-cta)"
-                                                />
-                                            </div>
-                                        </div>
-
-                                        {/* Content */}
-                                        <div className="p-4 flex-1 flex flex-col">
-                                            <h3 className="font-medium mb-2 line-clamp-1" style={{ color: 'var(--roomlock-text-primary)' }}>
-                                                {property.title}
-                                            </h3>
-                                            <div className="flex items-center gap-1 mb-3 text-sm" style={{ color: 'var(--roomlock-text-secondary)' }}>
-                                                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                </svg>
-                                                <span>{property.district}</span>
-                                            </div>
-                                            <div className="flex items-center gap-3 mb-3 text-sm" style={{ color: 'var(--roomlock-text-secondary)' }}>
-                                                <div className="flex items-center gap-1">
-                                                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                                                    </svg>
-                                                    <span>{property.stats.bedrooms}</span>
-                                                </div>
-                                                <div className="flex items-center gap-1">
-                                                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
-                                                    </svg>
-                                                    <span>{property.stats.bathrooms}</span>
-                                                </div>
-                                                <div className="flex items-center gap-1">
-                                                    <svg className="h-4 w-4 fill-current" style={{ color: 'var(--roomlock-highlight)' }} viewBox="0 0 24 24">
-                                                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                                                    </svg>
-                                                    <span>{property.stats.rating}</span>
-                                                </div>
-                                            </div>
-                                            <div className="flex items-baseline gap-2 mt-auto">
-                                                <span className="text-xl font-semibold" style={{ color: 'var(--roomlock-primary)' }}>
-                                                    S/.{property.price}
-                                                </span>
-                                                <span className="text-sm" style={{ color: 'var(--roomlock-text-secondary)' }}>
-                                                    /mes
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </button>
-
-                            </div>
+                            <ListingCard
+                                key={property.id}
+                                title={property.title}
+                                location={property.district}
+                                price={parseFloat(property.price)}
+                                beds={property.stats.bedrooms}
+                                baths={property.stats.bathrooms}
+                                rating={property.stats.rating}
+                                image={property.images[0] || '/placeholder.svg'}
+                                onClick={() => handleListingClick(property.id)}
+                                isFavorite={true}
+                                onToggleFavorite={(e) => handleToggleFavorite(e, property.id)}
+                                showFavoriteButton={true}
+                            />
                         ))}
                     </div>
                 )}

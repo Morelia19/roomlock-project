@@ -59,15 +59,12 @@ export const MyAnnouncementsPage = () => {
         navigate(`/announcement/${id}`);
     };
 
-    const handleEdit = (id: number) => {
-        // TODO: Navigate to edit page when implemented
+    const handleEdit = (_id: number) => {
         toast.info('Función de editar próximamente');
     };
 
-    const handleDelete = async (id: number) => {
+    const handleDelete = async (_id: number) => {
         if (!confirm('¿Estás seguro de eliminar este anuncio?')) return;
-
-        // TODO: Implement delete API when ready
         toast.info('Función de eliminar próximamente');
     };
 
@@ -84,7 +81,6 @@ export const MyAnnouncementsPage = () => {
     return (
         <div className="min-h-screen pt-20 pb-10 px-4" style={{ backgroundColor: "var(--roomlock-bg-lighter)" }}>
             <div className="container mx-auto max-w-7xl">
-                {/* Header */}
                 <div className="flex items-center justify-between mb-8">
                     <div>
                         <h1 className="text-3xl font-bold" style={{ color: "var(--roomlock-text-primary)" }}>
@@ -102,7 +98,6 @@ export const MyAnnouncementsPage = () => {
                     </Button>
                 </div>
 
-                {/* Statistics Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
                     <div className="bg-white p-6 rounded-xl">
                         <p className="text-sm text-gray-500 mb-1">Total Anuncios</p>
@@ -130,7 +125,6 @@ export const MyAnnouncementsPage = () => {
                     </div>
                 </div>
 
-                {/* Announcements List */}
                 <div className="bg-white p-6 rounded-xl">
                     <h2 className="text-xl font-semibold mb-6" style={{ color: "var(--roomlock-text-primary)" }}>
                         Tus Publicaciones
@@ -154,7 +148,6 @@ export const MyAnnouncementsPage = () => {
                                     key={announcement.id}
                                     className="flex items-center gap-6 p-4 border border-gray-200 rounded-xl hover:shadow-md transition-shadow"
                                 >
-                                    {/* Image */}
                                     <div className="flex-shrink-0">
                                         <img
                                             src={announcement.images[0] || '/placeholder.jpg'}
@@ -163,7 +156,6 @@ export const MyAnnouncementsPage = () => {
                                         />
                                     </div>
 
-                                    {/* Info */}
                                     <div className="flex-1">
                                         <div className="flex items-start justify-between mb-2">
                                             <div>
@@ -177,15 +169,14 @@ export const MyAnnouncementsPage = () => {
                                             </div>
                                             <span
                                                 className={`px-3 py-1 rounded-full text-sm font-medium ${announcement.state === 'activo'
-                                                        ? 'bg-green-100 text-green-700'
-                                                        : 'bg-yellow-100 text-yellow-700'
+                                                    ? 'bg-green-100 text-green-700'
+                                                    : 'bg-yellow-100 text-yellow-700'
                                                     }`}
                                             >
                                                 {announcement.state === 'activo' ? 'Activo' : 'Pendiente'}
                                             </span>
                                         </div>
 
-                                        {/* Stats */}
                                         <div className="flex items-center gap-6 text-sm text-gray-600 mb-3">
                                             <div className="flex items-center gap-1">
                                                 <Eye className="h-4 w-4" />
@@ -199,7 +190,6 @@ export const MyAnnouncementsPage = () => {
                                             </div>
                                         </div>
 
-                                        {/* Actions */}
                                         <div className="flex gap-3">
                                             <Button
                                                 variant="outline"
