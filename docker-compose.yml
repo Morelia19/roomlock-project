@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  # Servicio de Base de Datos (PostgreSQL)
+  db:
+    image: postgres:15-alpine
+    container_name: roomlock_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres    # Usuario (superuser por defecto)
+      POSTGRES_PASSWORD: password123 # Contraseña (cámbiala si quieres)
+      POSTGRES_DB: roomlock_db   # Nombre de la BD
+    ports:
+      - "5432:5432"              # Puerto Host:Puerto Contenedor
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

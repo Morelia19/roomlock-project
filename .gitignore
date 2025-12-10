@@ -1,0 +1,16 @@
+# Dependencias
+node_modules/
+
+# Variables de entorno (¡Nunca subir esto!)
+.env
+
+# Carpetas de compilación
+dist/
+build/
+coverage/
+
+# Base de datos local (Docker)
+postgres_data/
+
+# Archivos de sistema
+.DS_Store
