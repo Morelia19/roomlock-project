@@ -27,7 +27,9 @@ export interface Listing {
   reviews: Review[];
   university?: string;
   rating: number;
+  isFavorite?: boolean; // indicates if the listing is favorited by the current user
 }
+
 
 export interface Review {
   id: number;

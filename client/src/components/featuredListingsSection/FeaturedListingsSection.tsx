@@ -19,13 +19,20 @@ interface FeaturedListingsSectionProps {
     scrollRef: RefObject<HTMLDivElement | null>;
     onScroll: (direction: "left" | "right") => void;
     onListingClick: (id: number) => void;
+    showFavoriteButton?: boolean;
+    favorites?: Set<number>;
+    onToggleFavorite?: (listingId: number, e: React.MouseEvent) => void;
 }
+
 
 export const FeaturedListingsSection: FC<FeaturedListingsSectionProps> = ({
     listings,
     scrollRef,
     onScroll,
-    onListingClick
+    onListingClick,
+    showFavoriteButton = false,
+    favorites = new Set(),
+    onToggleFavorite
 }) => {
     return (
         <section className="py-16 px-4" style={{ backgroundColor: "white" }}>
@@ -68,6 +75,9 @@ export const FeaturedListingsSection: FC<FeaturedListingsSectionProps> = ({
                             rating={listing.rating}
                             image={listing.images[0]}
                             onClick={() => onListingClick(listing.id)}
+                            showFavoriteButton={showFavoriteButton}
+                            isFavorite={favorites.has(listing.id)}
+                            onToggleFavorite={onToggleFavorite ? (e) => onToggleFavorite(listing.id, e) : undefined}
                         />
                     ))}
                 </div>

@@ -1,5 +1,5 @@
 import type { FC } from "react";
-import { MapPin, Star, Bed, Bath } from 'lucide-react';
+import { MapPin, Star, Bed, Bath, Heart } from 'lucide-react';
 import { ImageWithFallback } from '@/components/imageWithFallback';
 
 interface ListingCardProps {
@@ -11,6 +11,9 @@ interface ListingCardProps {
     rating: number;
     image: string;
     onClick: () => void;
+    isFavorite?: boolean;
+    onToggleFavorite?: (e: React.MouseEvent) => void;
+    showFavoriteButton?: boolean;
 }
 
 export const ListingCard: FC<ListingCardProps> = ({
@@ -21,7 +24,10 @@ export const ListingCard: FC<ListingCardProps> = ({
     baths,
     rating,
     image,
-    onClick
+    onClick,
+    isFavorite = false,
+    onToggleFavorite,
+    showFavoriteButton = false
 }) => {
     return (
         <button
@@ -35,6 +41,19 @@ export const ListingCard: FC<ListingCardProps> = ({
                         alt={title}
                         className="h-full w-full object-cover"
                     />
+                    {showFavoriteButton && onToggleFavorite && (
+                        <button
+                            onClick={onToggleFavorite}
+                            className="absolute top-3 right-3 bg-white rounded-full p-2 shadow-md hover:scale-110 transition-transform z-10"
+                            aria-label={isFavorite ? "Quitar de favoritos" : "Agregar a favoritos"}
+                        >
+                            <Heart
+                                className="h-5 w-5"
+                                fill={isFavorite ? "#EF4444" : "none"}
+                                stroke="#EF4444"
+                            />
+                        </button>
+                    )}
                 </div>
                 <div className="p-4 flex-1 flex flex-col">
                     <h3 className="font-medium mb-2 line-clamp-1" style={{ color: "var(--roomlock-text-primary)" }}>
