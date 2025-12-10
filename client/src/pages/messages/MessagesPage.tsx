@@ -98,9 +98,16 @@ export const MessagesPage = () => {
             // Add message to current conversation
             setSelectedConversation(prev => {
                 if (!prev) return null;
+
+                // Create message with user info
+                const messageWithUserInfo = {
+                    ...message,
+                    sender_name: user?.name || 'Tú'
+                };
+
                 return {
                     ...prev,
-                    messages: [...prev.messages, message]
+                    messages: [...prev.messages, messageWithUserInfo]
                 };
             });
 
@@ -142,171 +149,174 @@ export const MessagesPage = () => {
     };
 
     return (
-        <div className="container mx-auto px-4 py-8">
-            <div className="flex gap-6 h-[calc(100vh-200px)]">
-                {/* Conversations List */}
-                <div className="w-1/3 bg-white rounded-lg border overflow-hidden flex flex-col">
-                    <div className="p-4 border-b">
-                        <h2 className="text-xl font-semibold flex items-center justify-between">
-                            Mensajes
-                            {conversations.length > 0 && (
-                                <span className="text-sm font-normal bg-gray-100 px-2 py-1 rounded-full">
-                                    {conversations.length}
-                                </span>
-                            )}
-                        </h2>
-                    </div>
+        <div className="min-h-screen pt-24 pb-4 px-4" style={{ backgroundColor: "var(--roomlock-bg-lighter)" }}>
+            <div className="container mx-auto">
+                <div className="flex gap-6" style={{ height: 'calc(100vh - 140px)' }}>
+                    {/* Conversations List */}
+                    <div className="w-1/4 bg-white rounded-lg border overflow-hidden flex flex-col">
+                        <div className="p-4 border-b">
+                            <h2 className="text-xl font-semibold flex items-center justify-between">
+                                Mensajes
+                                {conversations.length > 0 && (
+                                    <span className="text-sm font-normal bg-gray-100 px-2 py-1 rounded-full">
+                                        {conversations.length}
+                                    </span>
+                                )}
+                            </h2>
+                        </div>
 
-                    <div className="flex-1 overflow-y-auto">
-                        {isLoadingConversations ? (
-                            <div className="p-4 text-center text-gray-500">
-                                Cargando conversaciones...
-                            </div>
-                        ) : conversations.length === 0 ? (
-                            <div className="p-8 text-center text-gray-500">
-                                <UserIcon className="h-12 w-12 mx-auto mb-2 opacity-30" />
-                                <p>No tienes conversaciones aún</p>
-                            </div>
-                        ) : (
-                            conversations.map((conv) => (
-                                <button
-                                    key={conv.reservation_id}
-                                    onClick={() => loadConversationMessages(conv.reservation_id)}
-                                    className={`w-full p-4 border-b hover:bg-gray-50 transition-colors text-left ${selectedConversation?.reservation_id === conv.reservation_id
-                                        ? 'bg-blue-50 border-l-4 border-l-blue-500'
-                                        : ''
-                                        }`}
-                                >
-                                    <div className="flex items-start gap-3">
-                                        <div
-                                            className="flex h-12 w-12 items-center justify-center rounded-full text-white font-semibold flex-shrink-0"
-                                            style={{ backgroundColor: 'var(--roomlock-accent)' }}
-                                        >
-                                            {getInitials(conv.participant.name)}
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <div className="flex items-center justify-between mb-1">
-                                                <h3 className="font-semibold text-sm truncate">
-                                                    {conv.participant.name}
-                                                </h3>
+                        <div className="flex-1 overflow-y-auto">
+                            {isLoadingConversations ? (
+                                <div className="p-4 text-center text-gray-500">
+                                    Cargando conversaciones...
+                                </div>
+                            ) : conversations.length === 0 ? (
+                                <div className="p-8 text-center text-gray-500">
+                                    <UserIcon className="h-12 w-12 mx-auto mb-2 opacity-30" />
+                                    <p>No tienes conversaciones aún</p>
+                                </div>
+                            ) : (
+                                conversations.map((conv) => (
+                                    <button
+                                        key={conv.reservation_id}
+                                        onClick={() => loadConversationMessages(conv.reservation_id)}
+                                        className={`w-full p-4 border-b hover:bg-gray-50 transition-colors text-left ${selectedConversation?.reservation_id === conv.reservation_id
+                                            ? 'bg-blue-50 border-l-4 border-l-blue-500'
+                                            : ''
+                                            }`}
+                                    >
+                                        <div className="flex items-start gap-3">
+                                            <div
+                                                className="flex h-12 w-12 items-center justify-center rounded-full text-white font-semibold flex-shrink-0"
+                                                style={{ backgroundColor: 'var(--roomlock-accent)' }}
+                                            >
+                                                {getInitials(conv.participant.name)}
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex items-center justify-between mb-1">
+                                                    <h3 className="font-semibold text-sm truncate">
+                                                        {conv.participant.name}
+                                                    </h3>
+                                                    {conv.last_message && (
+                                                        <span className="text-xs text-gray-500 ml-2 flex-shrink-0">
+                                                            {formatDate(conv.last_message.sent_date)}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <p className="text-xs text-blue-600 mb-1 truncate">
+                                                    {conv.announcement_title}
+                                                </p>
                                                 {conv.last_message && (
-                                                    <span className="text-xs text-gray-500 ml-2 flex-shrink-0">
-                                                        {formatDate(conv.last_message.sent_date)}
-                                                    </span>
+                                                    <p className="text-sm text-gray-600 truncate">
+                                                        {conv.last_message.content}
+                                                    </p>
                                                 )}
                                             </div>
-                                            <p className="text-xs text-blue-600 mb-1 truncate">
-                                                {conv.announcement_title}
-                                            </p>
-                                            {conv.last_message && (
-                                                <p className="text-sm text-gray-600 truncate">
-                                                    {conv.last_message.content}
-                                                </p>
+                                            {conv.unread_count > 0 && (
+                                                <div className="bg-blue-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center flex-shrink-0">
+                                                    {conv.unread_count}
+                                                </div>
                                             )}
                                         </div>
-                                        {conv.unread_count > 0 && (
-                                            <div className="bg-blue-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center flex-shrink-0">
-                                                {conv.unread_count}
-                                            </div>
-                                        )}
-                                    </div>
-                                </button>
-                            ))
-                        )}
-                    </div>
-                </div>
-
-                {/* Messages Area */}
-                <div className="flex-1 bg-white rounded-lg border overflow-hidden flex flex-col">
-                    {!selectedConversation ? (
-                        <div className="flex-1 flex items-center justify-center text-gray-500">
-                            <div className="text-center">
-                                <UserIcon className="h-16 w-16 mx-auto mb-4 opacity-20" />
-                                <p>Selecciona una conversación para comenzar</p>
-                            </div>
+                                    </button>
+                                ))
+                            )}
                         </div>
-                    ) : (
-                        <>
-                            {/* Conversation Header */}
-                            <div className="p-4 border-b">
-                                <div className="flex items-center gap-3">
-                                    <div
-                                        className="flex h-10 w-10 items-center justify-center rounded-full text-white font-semibold"
-                                        style={{ backgroundColor: 'var(--roomlock-accent)' }}
-                                    >
-                                        {getInitials(selectedConversation.participant.name)}
-                                    </div>
-                                    <div>
-                                        <h3 className="font-semibold">{selectedConversation.participant.name}</h3>
-                                        <p className="text-sm text-gray-600">{selectedConversation.announcement.title}</p>
-                                    </div>
+                    </div>
+
+                    {/* Messages Area */}
+                    <div className="flex-1 bg-white rounded-lg border overflow-hidden flex flex-col">
+                        {!selectedConversation ? (
+                            <div className="flex-1 flex items-center justify-center text-gray-500">
+                                <div className="text-center">
+                                    <UserIcon className="h-16 w-16 mx-auto mb-4 opacity-20" />
+                                    <p>Selecciona una conversación para comenzar</p>
                                 </div>
                             </div>
+                        ) : (
+                            <>
+                                {/* Conversation Header */}
+                                <div className="p-4 border-b">
+                                    <div className="flex items-center gap-3">
+                                        <div
+                                            className="flex h-10 w-10 items-center justify-center rounded-full text-white font-semibold"
+                                            style={{ backgroundColor: 'var(--roomlock-accent)' }}
+                                        >
+                                            {getInitials(selectedConversation.participant.name)}
+                                        </div>
+                                        <div>
+                                            <h3 className="font-semibold">{selectedConversation.participant.name}</h3>
+                                            <p className="text-sm text-gray-600">{selectedConversation.announcement.title}</p>
+                                        </div>
+                                    </div>
+                                </div>
 
-                            {/* Messages */}
-                            <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                                {isLoadingMessages ? (
-                                    <div className="text-center text-gray-500">
-                                        Cargando mensajes...
-                                    </div>
-                                ) : selectedConversation.messages.length === 0 ? (
-                                    <div className="text-center text-gray-500 py-8">
-                                        No hay mensajes aún. ¡Envía el primero!
-                                    </div>
-                                ) : (
-                                    selectedConversation.messages.map((message) => {
-                                        const isOwnMessage = message.sender_id === user?.id;
-                                        return (
-                                            <div
-                                                key={message.id}
-                                                className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'}`}
-                                            >
+                                {/* Messages */}
+                                <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                                    {isLoadingMessages ? (
+                                        <div className="text-center text-gray-500">
+                                            Cargando mensajes...
+                                        </div>
+                                    ) : selectedConversation.messages.length === 0 ? (
+                                        <div className="text-center text-gray-500 py-8">
+                                            No hay mensajes aún. ¡Envía el primero!
+                                        </div>
+                                    ) : (
+                                        selectedConversation.messages.map((message) => {
+                                            const isOwnMessage = message.sender_id === user?.id;
+                                            return (
                                                 <div
-                                                    className={`max-w-[70%] rounded-lg px-4 py-2 ${isOwnMessage
-                                                        ? 'bg-blue-500 text-white'
-                                                        : 'bg-gray-100 text-gray-900'
-                                                        }`}
+                                                    key={message.id}
+                                                    className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'}`}
                                                 >
-                                                    <p className="text-sm">{message.content}</p>
-                                                    <p
-                                                        className={`text-xs mt-1 ${isOwnMessage ? 'text-blue-100' : 'text-gray-500'
+                                                    <div
+                                                        className={`max-w-[70%] rounded-lg px-4 py-2 ${isOwnMessage
+                                                            ? 'bg-blue-500 text-white'
+                                                            : 'bg-gray-100 text-gray-900'
                                                             }`}
                                                     >
-                                                        {formatTime(message.sent_date)}
-                                                    </p>
+                                                        <p className="text-sm">{message.content}</p>
+                                                        <p
+                                                            className={`text-xs mt-1 ${isOwnMessage ? 'text-blue-100' : 'text-gray-500'
+                                                                }`}
+                                                        >
+                                                            {formatTime(message.sent_date)}
+                                                        </p>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        );
-                                    })
-                                )}
-                                <div ref={messagesEndRef} />
-                            </div>
-
-                            {/* Message Input */}
-                            <form onSubmit={handleSendMessage} className="p-4 border-t">
-                                <div className="flex gap-2">
-                                    <input
-                                        type="text"
-                                        value={newMessage}
-                                        onChange={(e) => setNewMessage(e.target.value)}
-                                        placeholder="Escribe un mensaje..."
-                                        className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        disabled={isSending}
-                                    />
-                                    <Button
-                                        type="submit"
-                                        disabled={!newMessage.trim() || isSending}
-                                        style={{ backgroundColor: 'var(--roomlock-cta)', color: 'white' }}
-                                        className="px-4"
-                                    >
-                                        <Send className="h-5 w-5" />
-                                    </Button>
+                                            );
+                                        })
+                                    )}
+                                    <div ref={messagesEndRef} />
                                 </div>
-                            </form>
-                        </>
-                    )}
+
+                                {/* Message Input */}
+                                <form onSubmit={handleSendMessage} className="p-4 border-t">
+                                    <div className="flex gap-2">
+                                        <input
+                                            type="text"
+                                            value={newMessage}
+                                            onChange={(e) => setNewMessage(e.target.value)}
+                                            placeholder="Escribe un mensaje..."
+                                            className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            disabled={isSending}
+                                        />
+                                        <Button
+                                            type="submit"
+                                            disabled={!newMessage.trim() || isSending}
+                                            style={{ backgroundColor: 'var(--roomlock-cta)', color: 'white' }}
+                                            className="px-4"
+                                        >
+                                            <Send className="h-5 w-5" />
+                                        </Button>
+                                    </div>
+                                </form>
+                            </>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>
     );
 };
+
