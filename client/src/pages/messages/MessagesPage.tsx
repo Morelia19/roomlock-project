@@ -88,44 +88,38 @@ export const MessagesPage = () => {
 
         if (!newMessage.trim() || !selectedConversation) return;
 
+        const messageText = newMessage.trim();
+        setNewMessage(''); // Clear immediately for better UX
+
         try {
             setIsSending(true);
-            console.log('Sending message:', newMessage.trim());
-            console.log('Current conversation:', selectedConversation?.reservation_id);
 
             const message = await messageService.sendMessage(
                 selectedConversation.reservation_id,
-                newMessage.trim()
+                messageText
             );
 
-            console.log('Message sent, response:', message);
-
-            // Add message to current conversation
-            setSelectedConversation(prev => {
-                if (!prev) return null;
-
-                // Create message with user info
-                const messageWithUserInfo = {
-                    ...message,
-                    sender_name: user?.name || 'Tú'
-                };
-
-                console.log('Adding message to conversation:', messageWithUserInfo);
-                console.log('Previous messages count:', prev.messages.length);
-
-                const updated = {
-                    ...prev,
-                    messages: [...prev.messages, messageWithUserInfo]
-                };
-
-                console.log('New messages count:', updated.messages.length);
-                return updated;
+            // Force re-render by creating completely new object
+            setSelectedConversation({
+                ...selectedConversation,
+                messages: [
+                    ...selectedConversation.messages,
+                    {
+                        id: message.id,
+                        reservation_id: message.reservation_id,
+                        sender_id: message.sender_id,
+                        sender_name: message.sender_name,
+                        content: message.content,
+                        sent_date: message.sent_date
+                    }
+                ]
             });
 
-            setNewMessage('');
+            toast.success('Mensaje enviado');
         } catch (error) {
             console.error('Error sending message:', error);
             toast.error('Error al enviar mensaje');
+            setNewMessage(messageText); // Restore message on error
         } finally {
             setIsSending(false);
         }
