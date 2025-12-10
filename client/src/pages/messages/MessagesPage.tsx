@@ -89,7 +89,7 @@ export const MessagesPage = () => {
         if (!newMessage.trim() || !selectedConversation) return;
 
         const messageText = newMessage.trim();
-        setNewMessage(''); // Clear immediately for better UX
+        setNewMessage('');
 
         try {
             setIsSending(true);
@@ -99,19 +99,12 @@ export const MessagesPage = () => {
                 messageText
             );
 
-            // Force re-render by creating completely new object
+            // Optimistic UI update - add message immediately to state
             setSelectedConversation({
                 ...selectedConversation,
                 messages: [
                     ...selectedConversation.messages,
-                    {
-                        id: message.id,
-                        reservation_id: message.reservation_id,
-                        sender_id: message.sender_id,
-                        sender_name: message.sender_name,
-                        content: message.content,
-                        sent_date: message.sent_date
-                    }
+                    message
                 ]
             });
 
@@ -269,22 +262,24 @@ export const MessagesPage = () => {
                                     ) : (
                                         selectedConversation.messages.map((message, index) => {
                                             const isOwnMessage = message.sender_id === user?.id;
-                                            console.log('Rendering message:', message.id, message.content);
                                             return (
                                                 <div
                                                     key={`${message.id}-${index}`}
                                                     className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'}`}
                                                 >
                                                     <div
-                                                        className={`max-w-[70%] rounded-lg px-4 py-2 ${isOwnMessage
-                                                            ? 'bg-blue-500 text-white'
-                                                            : 'bg-gray-100 text-gray-900'
-                                                            }`}
+                                                        className="max-w-[70%] rounded-lg px-4 py-2"
+                                                        style={{
+                                                            backgroundColor: isOwnMessage ? 'var(--roomlock-cta)' : '#F3F4F6',
+                                                            color: isOwnMessage ? 'white' : '#1F2937'
+                                                        }}
                                                     >
                                                         <p className="text-sm">{message.content}</p>
                                                         <p
-                                                            className={`text-xs mt-1 ${isOwnMessage ? 'text-blue-100' : 'text-gray-500'
-                                                                }`}
+                                                            className="text-xs mt-1"
+                                                            style={{
+                                                                color: isOwnMessage ? 'rgba(255, 255, 255, 0.8)' : '#6B7280'
+                                                            }}
                                                         >
                                                             {formatTime(message.sent_date)}
                                                         </p>

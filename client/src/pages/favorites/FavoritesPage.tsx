@@ -140,17 +140,6 @@ export const FavoritesPage = () => {
                                     </div>
                                 </button>
 
-                                {/* Delete Button */}
-                                <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleRemoveFavorite(property.id);
-                                    }}
-                                    className="absolute bottom-4 right-4 p-2 bg-white rounded-full shadow-md hover:bg-red-50 transition-colors z-10"
-                                    title="Eliminar de favoritos"
-                                >
-                                    <Trash2 className="h-4 w-4" style={{ color: 'var(--roomlock-cta)' }} />
-                                </button>
                             </div>
                         ))}
                     </div>
