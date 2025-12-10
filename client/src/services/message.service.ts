@@ -1,6 +1,7 @@
 import { authService } from './auth.service';
 
-const API_URL = 'https://roomlock-api.onrender.com/api';
+const API_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api`;
+
 
 export interface Message {
     id: number;
