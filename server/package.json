@@ -7,7 +7,9 @@
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "migrate:dev": "echo '⚠️  Use: DATABASE_URL=<direct-url-port-5432> npm run migrate:dev:run' && exit 1",
+    "migrate:dev:run": "prisma migrate dev"
   },
   "keywords": [],
   "author": "Morelia Gonzales Valdivia",

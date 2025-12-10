@@ -9,100 +9,91 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Modelo Usuario (Estudiantes, Propietarios, Admin)
 model User {
-  id            Int      @id @default(autoincrement())
-  name          String   @db.VarChar(120)
-  email         String   @unique @db.VarChar(180)
+  id            Int               @id @default(autoincrement())
+  name          String            @db.VarChar(120)
+  email         String            @unique @db.VarChar(180)
   password      String
-  role          String   @db.VarChar(20)
-  register_date DateTime @default(now())
-
-  // Relaciones
-  verificacion    VerificacionUser?
-  anuncios        Announcement[]
-  reservas        Reserva[]
-  mensajes_env    Mensaje[]
-  valoraciones    Valoracion[]
+  role          String            @db.VarChar(20)
+  phone         String            @db.VarChar(20)
+  register_date DateTime          @default(now())
+  verification  UserVerification?
+  announcement  Announcement[]
+  reservation   Reservation[]
+  message_env   Message[]
+  review        Review[]
 }
 
-// Verificación de identidad
-model VerificacionUser {
+model UserVerification {
   id            Int       @id @default(autoincrement())
-  user_id    Int       @unique
-  user       User   @relation(fields: [user_id], references: [id])
+  user_id       Int       @unique
+  user          User      @relation(fields: [user_id], references: [id])
   url_dni       String?
   url_carne     String?
-  estado        String    @default("pendiente") @db.VarChar(20)
-  fecha_revision DateTime?
+  state         String    @default("pendiente") @db.VarChar(20)
+  revision_date DateTime?
 }
-  
-// Anuncios de habitaciones
+
 model Announcement {
-  id             Int       @id @default(autoincrement())
-  owner_id Int
-  owner    User   @relation(fields: [owner_id], references: [id])
-  title         String    @db.VarChar(150)
-  description    String?   @db.Text
-  precio         Decimal   @db.Decimal(10, 2)
-  distrito       String    @db.VarChar(120)
-  reglas         String?   @db.Text
-  latitud        Float?
-  longitud       Float?
-  fecha_creacion DateTime  @default(now())
-
-  // Relaciones
-  imagenes       ImagenAnuncio[]
-  servicios      ServicioAnuncio[]
-  reservas       Reserva[]
+  id            Int                   @id @default(autoincrement())
+  owner_id      Int
+  owner         User                  @relation(fields: [owner_id], references: [id])
+  title         String                @db.VarChar(150)
+  description   String?               @db.Text
+  price         Decimal               @db.Decimal(10, 2)
+  district      String                @db.VarChar(120)
+  rules         String?               @db.Text
+  latitude      Float?
+  longitude     Float?
+  creation_date DateTime              @default(now())
+  image         ImageAnnouncement[]
+  services      AnnouncementService[]
+  reservations  Reservation[]
 }
 
-model ImagenAnuncio {
-  id         Int     @id @default(autoincrement())
-  anuncio_id Int
-  anuncio    Announcement @relation(fields: [anuncio_id], references: [id])
-  url        String  @db.Text
+model ImageAnnouncement {
+  id              Int          @id @default(autoincrement())
+  announcement_id Int
+  announcement    Announcement @relation(fields: [announcement_id], references: [id])
+  url             String       @db.Text
 }
 
-model ServicioAnuncio {
-  id         Int     @id @default(autoincrement())
-  anuncio_id Int
-  anuncio    Announcement @relation(fields: [anuncio_id], references: [id])
-  servicio   String  @db.VarChar(120)
+model AnnouncementService {
+  id              Int          @id @default(autoincrement())
+  announcement_id Int
+  announcement    Announcement @relation(fields: [announcement_id], references: [id])
+  service         String       @db.VarChar(120)
 }
 
-// Reservas y Pagos
-model Reserva {
-  id             Int      @id @default(autoincrement())
-  anuncio_id     Int
-  anuncio        Announcement  @relation(fields: [anuncio_id], references: [id])
-  student_id  Int
-  student     User  @relation(fields: [student_id], references: [id])
-  estado         String   @default("pendiente") @db.VarChar(20)
-  fecha_creacion DateTime @default(now())
+model Reservation {
+  id              Int          @id @default(autoincrement())
+  announcement_id Int
+  announcement    Announcement @relation(fields: [announcement_id], references: [id])
+  student_id      Int
+  student         User         @relation(fields: [student_id], references: [id])
+  state           String       @default("pendiente") @db.VarChar(20)
+  creation_date   DateTime     @default(now())
 
-  mensajes     Mensaje[]
-  valoracion   Valoracion?
+  messages Message[]
+  review   Review?
 }
 
-// Mensajería
-model Mensaje {
-  id           Int      @id @default(autoincrement())
-  reserva_id   Int
-  reserva      Reserva  @relation(fields: [reserva_id], references: [id])
-  remitente_id Int
-  remitente    User  @relation(fields: [remitente_id], references: [id])
-  contenido    String?  @db.Text
-  fecha_envio  DateTime @default(now())
+model Message {
+  id             Int         @id @default(autoincrement())
+  reservation_id Int
+  reservation    Reservation @relation(fields: [reservation_id], references: [id])
+  sender_id      Int
+  sender         User        @relation(fields: [sender_id], references: [id])
+  content        String?     @db.Text
+  sent_date      DateTime    @default(now())
 }
 
-// Valoraciones
-model Valoracion {
-  id         Int      @id @default(autoincrement())
-  reserva_id Int      @unique
-  reserva    Reserva  @relation(fields: [reserva_id], references: [id])
-  user_id Int
-  user    User  @relation(fields: [user_id], references: [id])
-  estrellas  Int
-  comentario String?  @db.Text
+model Review {
+  id             Int         @id @default(autoincrement())
+  reservation_id Int         @unique
+  reservation    Reservation @relation(fields: [reservation_id], references: [id])
+  user_id        Int
+  user           User        @relation(fields: [user_id], references: [id])
+  stars          Int
+  comment        String?     @db.Text
 }
