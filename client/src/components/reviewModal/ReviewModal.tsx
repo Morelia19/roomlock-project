@@ -1,4 +1,4 @@
-import { FC, useState } from 'react';
+import { type FC, useState } from 'react';
 import { X, Star, Upload } from 'lucide-react';
 import { Button } from '@/components/button';
 
@@ -103,8 +103,8 @@ export const ReviewModal: FC<ReviewModalProps> = ({
                                 >
                                     <Star
                                         className={`h-8 w-8 ${star <= (hoverRating || rating)
-                                                ? 'fill-yellow-400 stroke-yellow-400'
-                                                : 'fill-gray-200 stroke-gray-300'
+                                            ? 'fill-yellow-400 stroke-yellow-400'
+                                            : 'fill-gray-200 stroke-gray-300'
                                             }`}
                                     />
                                 </button>
