@@ -90,10 +90,15 @@ export const MessagesPage = () => {
 
         try {
             setIsSending(true);
+            console.log('Sending message:', newMessage.trim());
+            console.log('Current conversation:', selectedConversation?.reservation_id);
+
             const message = await messageService.sendMessage(
                 selectedConversation.reservation_id,
                 newMessage.trim()
             );
+
+            console.log('Message sent, response:', message);
 
             // Add message to current conversation
             setSelectedConversation(prev => {
@@ -105,10 +110,16 @@ export const MessagesPage = () => {
                     sender_name: user?.name || 'Tú'
                 };
 
-                return {
+                console.log('Adding message to conversation:', messageWithUserInfo);
+                console.log('Previous messages count:', prev.messages.length);
+
+                const updated = {
                     ...prev,
                     messages: [...prev.messages, messageWithUserInfo]
                 };
+
+                console.log('New messages count:', updated.messages.length);
+                return updated;
             });
 
             setNewMessage('');
@@ -152,8 +163,8 @@ export const MessagesPage = () => {
         <div className="min-h-screen pt-24 pb-4 px-4" style={{ backgroundColor: "var(--roomlock-bg-lighter)" }}>
             <div className="container mx-auto">
                 <div className="flex gap-6" style={{ height: 'calc(100vh - 140px)' }}>
-                    {/* Conversations List */}
-                    <div className="w-1/4 bg-white rounded-lg border overflow-hidden flex flex-col">
+                    {/* Conversations List - 1/4 width */}
+                    <div className="w-1/4 min-w-[250px] bg-white rounded-lg border overflow-hidden flex flex-col">
                         <div className="p-4 border-b">
                             <h2 className="text-xl font-semibold flex items-center justify-between">
                                 Mensajes
@@ -224,7 +235,7 @@ export const MessagesPage = () => {
                         </div>
                     </div>
 
-                    {/* Messages Area */}
+                    {/* Messages Area - 3/4 width */}
                     <div className="flex-1 bg-white rounded-lg border overflow-hidden flex flex-col">
                         {!selectedConversation ? (
                             <div className="flex-1 flex items-center justify-center text-gray-500">
