@@ -23,6 +23,7 @@ model User {
   reservation   Reservation[]
   message_env   Message[]
   review        Review[]
+  favorites     Favorite[]
 }
 
 model UserVerification {
@@ -50,6 +51,7 @@ model Announcement {
   image         ImageAnnouncement[]
   services      AnnouncementService[]
   reservations  Reservation[]
+  favorites     Favorite[]
 }
 
 model ImageAnnouncement {
@@ -97,4 +99,15 @@ model Review {
   user           User        @relation(fields: [user_id], references: [id])
   stars          Int
   comment        String?     @db.Text
+}
+
+model Favorite {
+  id              Int          @id @default(autoincrement())
+  user_id         Int
+  user            User         @relation(fields: [user_id], references: [id])
+  announcement_id Int
+  announcement    Announcement @relation(fields: [announcement_id], references: [id])
+  created_at      DateTime     @default(now())
+
+  @@unique([user_id, announcement_id])
 }

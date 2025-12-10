@@ -1,6 +1,4 @@
-import { authService } from './auth.service';
-
-const API_URL = 'https://roomlock-api.onrender.com/api';
+import api from './api';
 
 export interface FavoriteAnnouncement {
     id: number;
@@ -26,57 +24,21 @@ export interface FavoriteAnnouncement {
 }
 
 class FavoriteService {
-    private getAuthHeaders() {
-        const token = authService.getToken();
-        return {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-        };
-    }
-
     async getFavorites(): Promise<FavoriteAnnouncement[]> {
-        const response = await fetch(`${API_URL}/favorites`, {
-            method: 'GET',
-            headers: this.getAuthHeaders()
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            throw new Error(data.error || 'Error al obtener favoritos');
-        }
-
-        return data.data;
+        const response = await api.get('/favorites');
+        return response.data.data;
     }
 
     async addFavorite(announcementId: number): Promise<void> {
-        const response = await fetch(`${API_URL}/favorites`, {
-            method: 'POST',
-            headers: this.getAuthHeaders(),
-            body: JSON.stringify({
-                announcement_id: announcementId
-            })
+        await api.post('/favorites', {
+            announcement_id: announcementId
         });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            throw new Error(data.error || 'Error al agregar a favoritos');
-        }
     }
 
     async removeFavorite(announcementId: number): Promise<void> {
-        const response = await fetch(`${API_URL}/favorites/${announcementId}`, {
-            method: 'DELETE',
-            headers: this.getAuthHeaders()
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            throw new Error(data.error || 'Error al eliminar de favoritos');
-        }
+        await api.delete(`/favorites/${announcementId}`);
     }
 }
 
 export const favoriteService = new FavoriteService();
+

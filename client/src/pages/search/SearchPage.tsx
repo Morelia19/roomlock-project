@@ -38,7 +38,6 @@ export const SearchPage = () => {
         }
     }, [location.state]);
 
-    // Load favorites when user is authenticated as student
     useEffect(() => {
         const loadFavorites = async () => {
             if (isAuthenticated && user?.role === 'student') {
@@ -89,7 +88,6 @@ export const SearchPage = () => {
 
         const isFavorite = favorites.has(listingId);
 
-        // Optimistic update
         setFavorites(prev => {
             const newFavorites = new Set(prev);
             if (isFavorite) {
@@ -139,18 +137,14 @@ export const SearchPage = () => {
     };
 
     const handleApplyFilters = () => {
-        // Filters are already applied via state
-        // This is called when user clicks "Aplicar Filtros" in drawer
     };
 
     return (
         <div className="min-h-screen pt-20 pb-10 px-4" style={{ backgroundColor: "var(--roomlock-bg-lighter)" }}>
             <div className="container mx-auto max-w-7xl">
 
-                {/* Search Bar */}
                 <div className="mb-6">
                     <div className="flex gap-3 items-center">
-                        {/* Search Input */}
                         <div className="relative flex-1">
                             <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
                             <Input
@@ -161,7 +155,6 @@ export const SearchPage = () => {
                             />
                         </div>
 
-                        {/* Filtros Button */}
                         <Button
                             variant="outline"
                             onClick={() => setShowFilterDrawer(true)}
@@ -171,7 +164,6 @@ export const SearchPage = () => {
                             <span>Filtros</span>
                         </Button>
 
-                        {/* View Toggle Buttons */}
                         <div className="flex gap-2">
                             <button
                                 onClick={() => setViewMode('grid')}
