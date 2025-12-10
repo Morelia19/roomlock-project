@@ -1,14 +1,19 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Mail, Lock, User, Key, Building2 } from "lucide-react";
+import { Mail, Lock, User, Key, Phone, Building2 } from "lucide-react";
 import { Button } from "@/components/button";
 import { Input } from "@/components/input";
 import { Label } from "@/components/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/tabs";
+import { toast } from "sonner";
+import { authService } from "@/services/auth.service";
 
 export const RegisterPage = () => {
     const navigate = useNavigate();
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState("");
+
     const [studentData, setStudentData] = useState({
         name: "",
         email: "",
@@ -23,25 +28,69 @@ export const RegisterPage = () => {
         phone: ""
     });
 
+    // Manejar cambio de teléfono para propietarios
+    const handleOwnerPhoneChange = (value: string) => {
+        // Solo permitir números y espacios
+        const cleaned = value.replace(/[^\d\s]/g, "");
+        setOwnerData({ ...ownerData, phone: cleaned });
+    };
+
     const handleStudentSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setError("");
 
-        // TODO: Conectar con la API de registro
-        console.log("Registrando estudiante:", { ...studentData, role: "student" });
+        // Validar email .edu.pe
+        if (!authService.validateStudentEmail(studentData.email)) {
+            setError("El correo debe terminar en .edu.pe para estudiantes");
+            toast.error("El correo debe terminar en .edu.pe para estudiantes");
+            return;
+        }
 
-        // Por ahora, simplemente navegar al login
-        // Cuando conectes la API, aquí harías el POST request
-        navigate("/login");
+        setIsLoading(true);
+
+        try {
+            await authService.register({
+                name: studentData.name,
+                email: studentData.email,
+                university: studentData.university,
+                password: studentData.password,
+                role: "student",
+            });
+
+            toast.success("¡Cuenta creada exitosamente!");
+            navigate("/login");
+        } catch (err) {
+            const errorMessage = err instanceof Error ? err.message : "Error al registrar usuario";
+            setError(errorMessage);
+            toast.error(errorMessage);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const handleOwnerSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setError("");
+        setIsLoading(true);
 
-        // TODO: Conectar con la API de registro
-        console.log("Registrando propietario:", { ...ownerData, role: "owner" });
+        try {
+            await authService.register({
+                name: ownerData.name,
+                email: ownerData.email,
+                phone: ownerData.phone,
+                password: ownerData.password,
+                role: "owner",
+            });
 
-        // Por ahora, simplemente navegar al login
-        navigate("/login");
+            toast.success("¡Cuenta creada exitosamente!");
+            navigate("/login");
+        } catch (err) {
+            const errorMessage = err instanceof Error ? err.message : "Error al registrar usuario";
+            setError(errorMessage);
+            toast.error(errorMessage);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -130,7 +179,7 @@ export const RegisterPage = () => {
                                             />
                                             <Input
                                                 id="student-university"
-                                                placeholder="Universidad Nacional..."
+                                                placeholder="Universidad Tecnológica del Perú"
                                                 value={studentData.university}
                                                 onChange={(e) => setStudentData({ ...studentData, university: e.target.value })}
                                                 className="pl-10"
@@ -158,12 +207,25 @@ export const RegisterPage = () => {
                                         </div>
                                     </div>
 
+                                    {error && (
+                                        <div
+                                            className="rounded-md p-3 text-sm"
+                                            style={{
+                                                backgroundColor: "rgba(239, 68, 68, 0.1)",
+                                                color: "rgb(239, 68, 68)",
+                                            }}
+                                        >
+                                            {error}
+                                        </div>
+                                    )}
+
                                     <Button
                                         type="submit"
                                         className="w-full"
                                         style={{ backgroundColor: "var(--roomlock-cta)", color: "white" }}
+                                        disabled={isLoading}
                                     >
-                                        Crear Cuenta de Estudiante
+                                        {isLoading ? "Creando cuenta..." : "Crear Cuenta de Estudiante"}
                                     </Button>
                                 </form>
                             </TabsContent>
@@ -209,13 +271,28 @@ export const RegisterPage = () => {
 
                                     <div className="space-y-2">
                                         <Label htmlFor="owner-phone">Teléfono</Label>
-                                        <Input
-                                            id="owner-phone"
-                                            placeholder="+51 999 999 999"
-                                            value={ownerData.phone}
-                                            onChange={(e) => setOwnerData({ ...ownerData, phone: e.target.value })}
-                                            required
-                                        />
+                                        <div className="relative">
+                                            <Phone
+                                                className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2"
+                                                style={{ color: "var(--roomlock-text-secondary)" }}
+                                            />
+                                            <div className="flex items-center">
+                                                <span
+                                                    className="absolute left-10 text-sm"
+                                                    style={{ color: "var(--roomlock-text-secondary)" }}
+                                                >
+                                                    +51
+                                                </span>
+                                                <Input
+                                                    id="owner-phone"
+                                                    placeholder="987 654 321"
+                                                    value={ownerData.phone}
+                                                    onChange={(e) => handleOwnerPhoneChange(e.target.value)}
+                                                    className="pl-20"
+                                                    required
+                                                />
+                                            </div>
+                                        </div>
                                     </div>
 
                                     <div className="space-y-2">
@@ -237,12 +314,25 @@ export const RegisterPage = () => {
                                         </div>
                                     </div>
 
+                                    {error && (
+                                        <div
+                                            className="rounded-md p-3 text-sm"
+                                            style={{
+                                                backgroundColor: "rgba(239, 68, 68, 0.1)",
+                                                color: "rgb(239, 68, 68)",
+                                            }}
+                                        >
+                                            {error}
+                                        </div>
+                                    )}
+
                                     <Button
                                         type="submit"
                                         className="w-full"
                                         style={{ backgroundColor: "var(--roomlock-cta)", color: "white" }}
+                                        disabled={isLoading}
                                     >
-                                        Crear Cuenta de Propietario
+                                        {isLoading ? "Creando cuenta..." : "Crear Cuenta de Propietario"}
                                     </Button>
                                 </form>
                             </TabsContent>

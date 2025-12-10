@@ -15,7 +15,8 @@ model User {
   email         String            @unique @db.VarChar(180)
   password      String
   role          String            @db.VarChar(20)
-  phone         String            @db.VarChar(20)
+  phone         String?           @db.VarChar(20)
+  university    String?           @db.VarChar(150)
   register_date DateTime          @default(now())
   verification  UserVerification?
   announcement  Announcement[]

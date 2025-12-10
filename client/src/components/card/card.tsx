@@ -5,7 +5,7 @@ interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
     className?: string;
 }
 
-export const Card: FC<CardProps> = (className, ...props) => {
+export const Card: FC<CardProps> = ({ className, ...props }) => {
     return (
         <div
             data-slot="card"

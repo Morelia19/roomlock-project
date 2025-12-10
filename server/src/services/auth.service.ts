@@ -18,7 +18,8 @@ export const registerUser = async (data: RegistroUsuarioDTO) => {
         data: {
             name: data.name,
             email: data.email,
-            phone: data.phone,
+            phone: data.phone || null,
+            university: data.university || null,
             password: claveEncriptada,
             role: data.role,
         },
