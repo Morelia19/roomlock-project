@@ -33,6 +33,11 @@ class AnnouncementService {
         const response = await api.get('/announcements/my-announcements');
         return response.data.data;
     }
+
+    async getAnnouncementById(id: number): Promise<AnnouncementResponse> {
+        const response = await api.get(`/announcements/${id}`);
+        return response.data.data;
+    }
 }
 
 export const announcementService = new AnnouncementService();
